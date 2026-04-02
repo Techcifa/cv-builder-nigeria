@@ -46,179 +46,225 @@ const App = () => {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: 'var(--bg)',
+      backgroundColor: 'transparent',
     },
     nav: {
       position: 'sticky',
       top: '0px',
-      backgroundColor: 'var(--bg)',
+      backgroundColor: 'rgba(5, 6, 8, 0.8)',
+      backdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
-      padding: '16px 24px',
+      padding: '12px 24px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      zIndex: '100',
+      zIndex: '1000',
     },
     logo: {
-      fontSize: '1.25rem',
-      fontWeight: '700',
-      letterSpacing: '-0.5px',
-      color: 'var(--text)',
+      fontSize: '1.4rem',
+      fontWeight: '800',
+      letterSpacing: '-1px',
+      background: 'linear-gradient(135deg, #fff 0%, var(--text-muted) 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
     },
     badge: {
-      backgroundColor: 'var(--surface2)',
-      color: 'var(--accent)',
-      padding: '4px 12px',
+      background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
+      color: 'white',
+      padding: '4px 10px',
       borderRadius: '20px',
-      fontSize: '0.75rem',
-      fontWeight: '600',
-      border: '1px solid var(--accent)',
+      fontSize: '0.7rem',
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      boxShadow: '0 0 15px var(--accent-glow)',
     },
     main: {
       flex: '1',
-      maxWidth: '900px',
+      maxWidth: '1000px',
       width: '100%',
       margin: '0 auto',
-      padding: '40px 20px',
+      padding: '60px 20px',
     },
     hero: {
       textAlign: 'center',
-      marginBottom: '60px',
+      marginBottom: '80px',
       display: result ? 'none' : 'block',
+      animation: 'fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+    heroTag: {
+      display: 'inline-block',
+      padding: '6px 16px',
+      borderRadius: '30px',
+      backgroundColor: 'var(--accent-alpha)',
+      color: 'var(--accent-light)',
+      fontSize: '0.85rem',
+      fontWeight: '600',
+      marginBottom: '24px',
+      border: '1px solid var(--border)',
     },
     headline: {
-      fontSize: '3.5rem',
-      fontWeight: '800',
-      lineHeight: '1.1',
-      marginBottom: '16px',
-      background: 'linear-gradient(to right, var(--text), var(--text-muted))',
+      fontSize: '4.5rem',
+      fontWeight: '900',
+      lineHeight: '1',
+      marginBottom: '24px',
+      letterSpacing: '-2px',
+      background: 'linear-gradient(to bottom right, #fff 30%, #64748b 100%)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
     },
     subheadline: {
       fontSize: '1.25rem',
       color: 'var(--text-muted)',
-      marginBottom: '40px',
-      maxWidth: '600px',
-      margin: '0 auto 40px',
+      marginBottom: '48px',
+      maxWidth: '650px',
+      margin: '0 auto 48px',
+      lineHeight: '1.6',
     },
     stats: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-      gap: '20px',
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '40px',
+      flexWrap: 'wrap',
     },
     statItem: {
-      backgroundColor: 'var(--surface)',
-      padding: '16px',
-      borderRadius: 'var(--radius)',
-      border: '1px solid var(--border)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
     },
     statVal: {
-      display: 'block',
-      fontSize: '1.5rem',
-      fontWeight: '700',
-      color: 'var(--green)',
+      fontSize: '1.8rem',
+      fontWeight: '800',
+      color: 'var(--text)',
       marginBottom: '4px',
     },
     statLabel: {
       fontSize: '0.8rem',
       color: 'var(--text-muted)',
-      fontWeight: '500',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+      fontWeight: '600',
     },
     errorBanner: {
       backgroundColor: 'var(--red-alpha)',
       border: '1px solid var(--red)',
       color: 'var(--red)',
-      padding: '12px 20px',
+      padding: '16px 24px',
       borderRadius: 'var(--radius)',
-      marginBottom: '20px',
+      marginBottom: '32px',
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      fontWeight: '500',
+      fontWeight: '600',
+      animation: 'fadeIn 0.3s ease-out',
     },
     mainCard: {
       backgroundColor: 'var(--surface)',
-      borderRadius: '16px',
-      padding: '32px',
+      borderRadius: 'var(--radius-lg)',
+      padding: '40px',
       border: '1px solid var(--border)',
-      boxShadow: '0px 20px 40px rgba(0,0,0,0.4)',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    cardDecoration: {
+      position: 'absolute',
+      top: '0',
+      right: '0',
+      width: '300px',
+      height: '300px',
+      background: 'radial-gradient(circle, var(--accent-glow) 0%, transparent 70%)',
+      zIndex: '0',
+      pointerEvents: 'none',
     },
     loaderContainer: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '80px 0px',
-      gap: '20px',
+      padding: '100px 0',
+      gap: '24px',
+      position: 'relative',
+      zIndex: '1',
     },
     spinner: {
-      width: '48px',
-      height: '48px',
-      border: '4px solid var(--surface2)',
+      width: '64px',
+      height: '64px',
+      border: '3px solid rgba(255,255,255,0.05)',
       borderTopColor: 'var(--accent)',
       borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
+      animation: 'spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite',
     }
   };
 
   return (
     <div style={styles.app}>
       <nav style={styles.nav}>
-        <div style={styles.logo}>🎯 GT CV Builder</div>
+        <div style={styles.logo}>
+          <span style={{ fontSize: '1.8rem' }}>🎯</span>
+          <span>GT BUILDER</span>
+        </div>
         <div style={styles.badge}>Nigeria Edition</div>
       </nav>
 
       <main style={styles.main}>
         <section style={styles.hero}>
-          <h1 style={styles.headline}>Land Your Nigerian Graduate Trainee Role</h1>
-          <p style={styles.subheadline}>Get industry-specific ATS optimisation, gap analysis, and a certification roadmap in seconds.</p>
+          <div style={styles.heroTag}>Powered by Gemini 2.0 Flash Lite</div>
+          <h1 style={styles.headline}>Rewrite Your Future.</h1>
+          <p style={styles.subheadline}>Transform your raw experience into a high-impact, industry-optimized CV tailored for Nigeria's top Graduate Trainee roles.</p>
           
           <div style={styles.stats}>
             <div style={styles.statItem}>
-              <span style={styles.statVal}>4 / Target</span>
+              <span style={styles.statVal}>4</span>
               <span style={styles.statLabel}>Industries</span>
             </div>
             <div style={styles.statItem}>
-              <span style={styles.statVal}>ATS / Opt</span>
-              <span style={styles.statLabel}>Output</span>
+              <span style={styles.statVal}>ATS+</span>
+              <span style={styles.statLabel}>Optimized</span>
             </div>
             <div style={styles.statItem}>
-              <span style={styles.statVal}>CAR / Fmt</span>
-              <span style={styles.statLabel}>Bullets</span>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statVal}>Free / No</span>
-              <span style={styles.statLabel}>Sign-Up</span>
+              <span style={styles.statVal}>100%</span>
+              <span style={styles.statLabel}>Nigerian Focus</span>
             </div>
           </div>
         </section>
 
         {error && (
           <div style={styles.errorBanner}>
-            <span role="img" aria-label="warning">⚠️</span> {error}
+            <span role="img" aria-label="warning" style={{ fontSize: '1.2rem' }}>⚠️</span> {error}
           </div>
         )}
 
         <div style={styles.mainCard}>
-          {loading ? (
-            <div style={styles.loaderContainer}>
-              <div style={styles.spinner} />
-              <div style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Analysing your CV and research patterns...</div>
-            </div>
-          ) : result ? (
-            <ResultTabs data={{ ...result, industry }} onReset={() => setResult(null)} />
-          ) : (
-            <CVInput 
-              cvText={cvText} 
-              setCvText={setCvText}
-              industry={industry}
-              setIndustry={setIndustry}
-              onSubmit={handleSubmit}
-              loading={loading}
-            />
-          )}
+          <div style={styles.cardDecoration} />
+          <div style={{ position: 'relative', zIndex: '1' }}>
+            {loading ? (
+              <div style={styles.loaderContainer}>
+                <div style={styles.spinner} />
+                <div style={{ color: 'var(--text)', fontSize: '1.1rem', fontWeight: '600' }}>Crafting your professional profile...</div>
+                <div style={{ color: 'var(--text-muted)' }}>This takes about 10-15 seconds</div>
+              </div>
+            ) : result ? (
+              <ResultTabs data={{ ...result, industry }} onReset={() => setResult(null)} />
+            ) : (
+              <CVInput 
+                cvText={cvText} 
+                setCvText={setCvText}
+                industry={industry}
+                setIndustry={setIndustry}
+                onSubmit={handleSubmit}
+                loading={loading}
+              />
+            )}
+          </div>
         </div>
       </main>
+      
+      <footer style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+        Built for Nigerian Graduates • Processed securely with Google AI
+      </footer>
     </div>
   );
 };
