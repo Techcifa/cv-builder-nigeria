@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import CoverLetterTab from './tabs/CoverLetterTab';
+import LinkedInTab from './tabs/LinkedInTab';
 
 const ResultTabs = ({ data, onReset }) => {
   const [activeTab, setActiveTab] = useState('cv');
   const [copied, setCopied] = useState(false);
 
-  const { rewritten_cv, gap_analysis, certifications, industry } = data;
+  const { rewritten_cv, gap_analysis, certifications, cover_letter, linkedin_bio, industry } = data;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(rewritten_cv);
@@ -12,14 +15,16 @@ const ResultTabs = ({ data, onReset }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([rewritten_cv], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `GT_CV_${industry.toUpperCase()}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('cv-pdf-template');
+    const opt = {
+      margin:       [10, 10, 10, 10], // mm
+      filename:     `GT_CV_${industry.toUpperCase()}_EXPERT.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
   };
 
   const criticalCount = gap_analysis.filter(g => g.severity === 'critical').length;
@@ -204,7 +209,13 @@ const ResultTabs = ({ data, onReset }) => {
           <span style={{ marginRight: '8px' }}>⚠️</span> Gap Analysis
         </button>
         <button style={styles.tab(activeTab === 'certs')} onClick={() => setActiveTab('certs')}>
-          <span style={{ marginRight: '8px' }}>🎓</span> certifications
+          <span style={{ marginRight: '8px' }}>🎓</span> Certs
+        </button>
+        <button style={styles.tab(activeTab === 'cover')} onClick={() => setActiveTab('cover')}>
+          <span style={{ marginRight: '8px' }}>📝</span> Cover Letter
+        </button>
+        <button style={styles.tab(activeTab === 'linkedin')} onClick={() => setActiveTab('linkedin')}>
+          <span style={{ marginRight: '8px' }}>💼</span> LinkedIn Bio
         </button>
       </div>
 
@@ -221,8 +232,8 @@ const ResultTabs = ({ data, onReset }) => {
               >
                 {copied ? '✓ COPIED TO CLIPBOARD' : '📋 COPY REWRITTEN CV'}
               </button>
-              <button style={styles.btn} onClick={handleDownload}>
-                <span>⬇</span> DOWNLOAD .TXT
+              <button style={{ ...styles.btn, backgroundColor: 'var(--accent)', color: 'white', borderColor: 'var(--accent-glow)' }} onClick={handleDownloadPDF}>
+                <span>⬇</span> DOWNLOAD PREMIUM PDF ⚡
               </button>
             </div>
           </div>
@@ -291,11 +302,39 @@ const ResultTabs = ({ data, onReset }) => {
             ))}
           </div>
         )}
+
+        {activeTab === 'cover' && (
+          <CoverLetterTab content={cover_letter} industry={industry} />
+        )}
+
+        {activeTab === 'linkedin' && (
+          <LinkedInTab content={linkedin_bio} />
+        )}
       </div>
 
       <button style={styles.resetBtn} onClick={onReset}>
         <span>↺</span> START OVER WITH A DIFFERENT INDUSTRY
       </button>
+
+      {/* Hidden PDF Template */}
+      <div style={{ display: 'none' }}>
+        <div id="cv-pdf-template" style={{ 
+          padding: '40px', 
+          backgroundColor: 'white', 
+          color: '#1a202c', 
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          lineHeight: '1.6',
+          fontSize: '11pt'
+        }}>
+          <div style={{ borderBottom: '3px solid #6366f1', paddingBottom: '20px', marginBottom: '30px', textAlign: 'center' }}>
+            <h1 style={{ fontSize: '24pt', fontWeight: '900', color: '#111827', margin: '0 0 8px 0', textTransform: 'uppercase' }}>{rewritten_cv.split('\n')[0].replace('NAME: ', '')}</h1>
+            <p style={{ fontSize: '10pt', color: '#4b5563', margin: '0' }}>{rewritten_cv.split('\n')[1].replace('CONTACT: ', '')}</p>
+          </div>
+          <div style={{ whiteSpace: 'pre-wrap', color: '#374151' }}>
+            {rewritten_cv.split('\n').slice(2).join('\n').replace(/=== (.*?) ===/g, '<h2 style="font-size: 14pt; font-weight: 800; color: #1f2937; border-bottom: 2px solid #e5e7eb; margin: 25px 0 12px 0; padding-bottom: 4px; text-transform: uppercase;">$1</h2>')}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
 import CVInput from './components/CVInput';
+import WizardShell from './components/wizard/WizardShell';
 import ResultTabs from './components/ResultTabs';
+import FlowSelector from './components/FlowSelector';
 
 const App = () => {
+  const [flow, setFlow] = useState('landing'); // 'landing', 'paste', 'wizard', 'results'
   const [cvText, setCvText] = useState('');
   const [industry, setIndustry] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
-    if (cvText.length < 100 || !industry || loading) return;
-
+  const handleGenerate = async (inputText, targetIndustry) => {
     setLoading(true);
     setError('');
-    setResult(null);
-
+    
     try {
       const response = await fetch('/api/cv/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cvText, industry }),
+        body: JSON.stringify({ cvText: inputText, industry: targetIndustry }),
       });
 
       const data = await response.json();
@@ -30,6 +30,8 @@ const App = () => {
       }
 
       setResult(data);
+      setIndustry(targetIndustry);
+      setFlow('results');
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('quota')) {
         setError('API limits reached. Please try again in 60 seconds.');
@@ -70,6 +72,7 @@ const App = () => {
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
+      cursor: 'pointer',
     },
     badge: {
       background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
@@ -92,7 +95,7 @@ const App = () => {
     hero: {
       textAlign: 'center',
       marginBottom: 'var(--hero-margin)',
-      display: result ? 'none' : 'block',
+      display: flow === 'results' ? 'none' : 'block',
       animation: 'fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
     },
     heroTag: {
@@ -124,42 +127,35 @@ const App = () => {
       margin: '0 auto 48px',
       lineHeight: '1.6',
     },
-    stats: {
-      display: 'flex',
-      justifyContent: 'center',
-      gap: '40px',
-      flexWrap: 'wrap',
+    landingGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, 1fr)',
+      gap: '24px',
+      marginTop: '40px',
     },
-    statItem: {
+    choiceCard: {
+      padding: '48px 32px',
+      borderRadius: 'var(--radius-lg)',
+      backgroundColor: 'var(--surface)',
+      border: '1px solid var(--border)',
+      textAlign: 'center',
+      cursor: 'pointer',
+      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      gap: '20px',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
     },
-    statVal: {
-      fontSize: '1.8rem',
+    choiceTitle: {
+      fontSize: '1.5rem',
       fontWeight: '800',
-      color: 'var(--text)',
-      marginBottom: '4px',
+      color: 'white',
     },
-    statLabel: {
-      fontSize: '0.8rem',
+    choiceDesc: {
+      fontSize: '0.95rem',
       color: 'var(--text-muted)',
-      textTransform: 'uppercase',
-      letterSpacing: '1px',
-      fontWeight: '600',
-    },
-    errorBanner: {
-      backgroundColor: 'var(--red-alpha)',
-      border: '1px solid var(--red)',
-      color: 'var(--red)',
-      padding: '16px 24px',
-      borderRadius: 'var(--radius)',
-      marginBottom: '32px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      fontWeight: '600',
-      animation: 'fadeIn 0.3s ease-out',
+      lineHeight: '1.5',
     },
     mainCard: {
       backgroundColor: 'var(--surface)',
@@ -169,6 +165,7 @@ const App = () => {
       boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
       position: 'relative',
       overflow: 'hidden',
+      animation: 'fadeIn 0.5s ease-out',
     },
     cardDecoration: {
       position: 'absolute',
@@ -196,13 +193,78 @@ const App = () => {
       borderTopColor: 'var(--accent)',
       borderRadius: '50%',
       animation: 'spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+    },
+    overlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(5, 6, 8, 0.8)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '100',
+      gap: '24px',
     }
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div style={styles.loaderContainer}>
+          <div style={styles.spinner} />
+          <div style={{ color: 'var(--text)', fontSize: '1.1rem', fontWeight: '600' }}>Building your future...</div>
+          <div style={{ color: 'var(--text-muted)' }}>AI is crafting your expert profile</div>
+        </div>
+      );
+    }
+
+    if (flow === 'landing') {
+      return <FlowSelector onSelect={setFlow} />;
+    }
+
+    if (flow === 'paste') {
+      return (
+        <div style={styles.mainCard}>
+          <div style={styles.cardDecoration} />
+          <CVInput 
+            cvText={cvText} 
+            setCvText={setCvText}
+            industry={industry}
+            setIndustry={setIndustry}
+            onSubmit={() => handleGenerate(cvText, industry)}
+            loading={loading}
+          />
+        </div>
+      );
+    }
+
+    if (flow === 'wizard') {
+      return (
+        <div style={styles.mainCard}>
+          <div style={styles.cardDecoration} />
+          <WizardShell 
+            onComplete={(assembledText, ind) => handleGenerate(assembledText, ind)}
+            onCancel={() => setFlow('landing')}
+          />
+        </div>
+      );
+    }
+
+    if (flow === 'results') {
+      return <ResultTabs data={{ ...result, industry }} onReset={() => { setFlow('landing'); setResult(null); }} />;
+    }
+
+    return null;
   };
 
   return (
     <div style={styles.app}>
       <nav style={styles.nav}>
-        <div style={styles.logo}>
+        <div style={styles.logo} onClick={() => setFlow('landing')}>
           <span style={{ fontSize: '1.8rem' }}>🎯</span>
           <span>GT BUILDER</span>
         </div>
@@ -210,26 +272,11 @@ const App = () => {
       </nav>
 
       <main style={styles.main}>
-        <section style={styles.hero}>
+        <header style={styles.hero}>
           <div style={styles.heroTag}>Powered by DeepSeek-V3</div>
           <h1 style={styles.headline}>Rewrite Your Future.</h1>
           <p style={styles.subheadline}>Transform your raw experience into a high-impact, industry-optimized CV tailored for Nigeria's top Graduate Trainee roles.</p>
-          
-          <div style={styles.stats}>
-            <div style={styles.statItem}>
-              <span style={styles.statVal}>4</span>
-              <span style={styles.statLabel}>Industries</span>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statVal}>ATS+</span>
-              <span style={styles.statLabel}>Optimized</span>
-            </div>
-            <div style={styles.statItem}>
-              <span style={styles.statVal}>100%</span>
-              <span style={styles.statLabel}>Nigerian Focus</span>
-            </div>
-          </div>
-        </section>
+        </header>
 
         {error && (
           <div style={styles.errorBanner}>
@@ -237,29 +284,7 @@ const App = () => {
           </div>
         )}
 
-        <div style={styles.mainCard}>
-          <div style={styles.cardDecoration} />
-          <div style={{ position: 'relative', zIndex: '1' }}>
-            {loading ? (
-              <div style={styles.loaderContainer}>
-                <div style={styles.spinner} />
-                <div style={{ color: 'var(--text)', fontSize: '1.1rem', fontWeight: '600' }}>Crafting your professional profile...</div>
-                <div style={{ color: 'var(--text-muted)' }}>This takes about 10-15 seconds</div>
-              </div>
-            ) : result ? (
-              <ResultTabs data={{ ...result, industry }} onReset={() => setResult(null)} />
-            ) : (
-              <CVInput 
-                cvText={cvText} 
-                setCvText={setCvText}
-                industry={industry}
-                setIndustry={setIndustry}
-                onSubmit={handleSubmit}
-                loading={loading}
-              />
-            )}
-          </div>
-        </div>
+        {renderContent()}
       </main>
       
       <footer style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>

@@ -5,6 +5,7 @@ const bankingPrompt    = require('../prompts/banking');
 const fmcgPrompt       = require('../prompts/fmcg');
 const consultingPrompt = require('../prompts/consulting');
 const oilAndGasPrompt  = require('../prompts/oilandgas');
+const wizardBuilder    = require('../prompts/wizardBuilder');
 
 const PROMPT_MAP = {
   banking:    bankingPrompt,
@@ -66,10 +67,12 @@ async function callDeepSeek(prompt, isRetry = false) {
 router.post('/generate', async (req, res) => {
   const { cvText, industry } = req.body;
 
-  if (!cvText || typeof cvText !== 'string' || cvText.trim().length < 100) {
+  const isStructured = typeof cvText === 'object' && cvText !== null;
+
+  if (!isStructured && (!cvText || typeof cvText !== 'string' || cvText.trim().length < 100)) {
     return res.status(400).json({ error: 'Please paste your full CV text (minimum 100 characters).' });
   }
-  if (!industry || !PROMPT_MAP[industry]) {
+  if (!industry || (!PROMPT_MAP[industry] && !isStructured)) {
     return res.status(400).json({ error: 'Invalid industry selected.' });
   }
   if (!process.env.DEEPSEEK_API_KEY) {
@@ -77,7 +80,10 @@ router.post('/generate', async (req, res) => {
   }
 
   try {
-    const prompt  = PROMPT_MAP[industry](cvText.trim());
+    const prompt = isStructured 
+      ? wizardBuilder(cvText)
+      : PROMPT_MAP[industry](cvText.trim());
+    
     const rawText = await callDeepSeek(prompt);
 
     let parsed;
@@ -88,7 +94,7 @@ router.post('/generate', async (req, res) => {
       return res.status(500).json({ error: 'AI returned malformed output. Please try again.' });
     }
 
-    if (!parsed.rewritten_cv || !Array.isArray(parsed.gap_analysis) || !Array.isArray(parsed.certifications)) {
+    if (!parsed.rewritten_cv || !Array.isArray(parsed.gap_analysis) || !Array.isArray(parsed.certifications) || !parsed.cover_letter || !parsed.linkedin_bio) {
       return res.status(500).json({ error: 'AI response was missing expected fields. Please try again.' });
     }
 
@@ -96,6 +102,8 @@ router.post('/generate', async (req, res) => {
       rewritten_cv:   parsed.rewritten_cv,
       gap_analysis:   parsed.gap_analysis,
       certifications: parsed.certifications,
+      cover_letter:   parsed.cover_letter,
+      linkedin_bio:   parsed.linkedin_bio,
       industry,
     });
 
