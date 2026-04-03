@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import Landing from './pages/Landing';
 import CVInput from './components/CVInput';
 import WizardShell from './components/wizard/WizardShell';
 import ResultTabs from './components/ResultTabs';
 import FlowSelector from './components/FlowSelector';
 
 const App = () => {
-  const [flow, setFlow] = useState('landing'); // 'landing', 'paste', 'wizard', 'results'
+  const [flow, setFlow] = useState('marketing'); // 'marketing', 'landing', 'paste', 'wizard', 'results'
   const [cvText, setCvText] = useState('');
   const [industry, setIndustry] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,17 @@ const App = () => {
     }
   };
 
+  const handleReset = () => {
+    setFlow('landing');
+    setResult(null);
+    setError('');
+  };
+
+  // Marketing page — no chrome wrapper
+  if (flow === 'marketing') {
+    return <Landing onStart={() => setFlow('landing')} />;
+  }
+
   const styles = {
     app: {
       minHeight: '100vh',
@@ -53,7 +65,7 @@ const App = () => {
     nav: {
       position: 'sticky',
       top: '0px',
-      backgroundColor: 'rgba(5, 6, 8, 0.8)',
+      backgroundColor: 'rgba(5, 6, 8, 0.85)',
       backdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
       padding: '12px 24px',
@@ -63,12 +75,9 @@ const App = () => {
       zIndex: '1000',
     },
     logo: {
-      fontSize: '1.4rem',
+      fontSize: '1.2rem',
       fontWeight: '800',
-      letterSpacing: '-1px',
-      background: 'linear-gradient(135deg, #fff 0%, var(--text-muted) 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
+      letterSpacing: '-0.5px',
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
@@ -79,11 +88,10 @@ const App = () => {
       color: 'white',
       padding: '4px 10px',
       borderRadius: '20px',
-      fontSize: '0.7rem',
+      fontSize: '0.68rem',
       fontWeight: '700',
       textTransform: 'uppercase',
       letterSpacing: '1px',
-      boxShadow: '0 0 15px var(--accent-glow)',
     },
     main: {
       flex: '1',
@@ -104,58 +112,27 @@ const App = () => {
       borderRadius: '30px',
       backgroundColor: 'var(--accent-alpha)',
       color: 'var(--accent-light)',
-      fontSize: '0.85rem',
+      fontSize: '0.8rem',
       fontWeight: '600',
-      marginBottom: '24px',
-      border: '1px solid var(--border)',
+      marginBottom: '20px',
+      border: '1px solid var(--accent-glow)',
     },
     headline: {
       fontSize: 'var(--hero-size)',
       fontWeight: '900',
       lineHeight: '1.1',
-      marginBottom: '24px',
+      marginBottom: '20px',
       letterSpacing: '-2px',
       background: 'linear-gradient(to bottom right, #fff 30%, #64748b 100%)',
       WebkitBackgroundClip: 'text',
       WebkitTextFillColor: 'transparent',
     },
     subheadline: {
-      fontSize: '1.25rem',
+      fontSize: '1.1rem',
       color: 'var(--text-muted)',
-      marginBottom: '48px',
-      maxWidth: '650px',
-      margin: '0 auto 48px',
+      maxWidth: '600px',
+      margin: '0 auto 36px',
       lineHeight: '1.6',
-    },
-    landingGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: '24px',
-      marginTop: '40px',
-    },
-    choiceCard: {
-      padding: '48px 32px',
-      borderRadius: 'var(--radius-lg)',
-      backgroundColor: 'var(--surface)',
-      border: '1px solid var(--border)',
-      textAlign: 'center',
-      cursor: 'pointer',
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '20px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-    },
-    choiceTitle: {
-      fontSize: '1.5rem',
-      fontWeight: '800',
-      color: 'white',
-    },
-    choiceDesc: {
-      fontSize: '0.95rem',
-      color: 'var(--text-muted)',
-      lineHeight: '1.5',
     },
     mainCard: {
       backgroundColor: 'var(--surface)',
@@ -169,13 +146,10 @@ const App = () => {
     },
     cardDecoration: {
       position: 'absolute',
-      top: '0',
-      right: '0',
-      width: '300px',
-      height: '300px',
+      top: '0', right: '0',
+      width: '300px', height: '300px',
       background: 'radial-gradient(circle, var(--accent-glow) 0%, transparent 70%)',
-      zIndex: '0',
-      pointerEvents: 'none',
+      zIndex: '0', pointerEvents: 'none',
     },
     loaderContainer: {
       display: 'flex',
@@ -187,28 +161,25 @@ const App = () => {
       zIndex: '1',
     },
     spinner: {
-      width: '64px',
-      height: '64px',
+      width: '64px', height: '64px',
       border: '3px solid rgba(255,255,255,0.05)',
       borderTopColor: 'var(--accent)',
       borderRadius: '50%',
       animation: 'spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite',
     },
-    overlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(5, 6, 8, 0.8)',
-      backdropFilter: 'blur(4px)',
+    errorBanner: {
+      backgroundColor: 'var(--red-alpha)',
+      border: '1px solid rgba(239,68,68,0.3)',
+      borderRadius: 'var(--radius)',
+      padding: '16px 20px',
+      color: 'var(--red)',
+      fontSize: '0.95rem',
+      fontWeight: '600',
+      marginBottom: '24px',
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: '100',
-      gap: '24px',
-    }
+      gap: '10px',
+    },
   };
 
   const renderContent = () => {
@@ -216,22 +187,31 @@ const App = () => {
       return (
         <div style={styles.loaderContainer}>
           <div style={styles.spinner} />
-          <div style={{ color: 'var(--text)', fontSize: '1.1rem', fontWeight: '600' }}>Building your future...</div>
-          <div style={{ color: 'var(--text-muted)' }}>AI is crafting your expert profile</div>
+          <div style={{ color: 'var(--text)', fontSize: '1.1rem', fontWeight: '700' }}>Building your career suite...</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>AI is crafting all 5 assets — this takes ~30 seconds</div>
         </div>
       );
     }
 
     if (flow === 'landing') {
-      return <FlowSelector onSelect={setFlow} />;
+      return (
+        <>
+          <header style={styles.hero}>
+            <div style={styles.heroTag}>✨ AI-Powered • Nigeria-Specific • Free</div>
+            <h1 style={styles.headline}>Choose How to Start</h1>
+            <p style={styles.subheadline}>Have an existing CV or starting fresh? Either way, we'll generate a complete career package for Nigerian GT roles.</p>
+          </header>
+          <FlowSelector onSelect={setFlow} />
+        </>
+      );
     }
 
     if (flow === 'paste') {
       return (
         <div style={styles.mainCard}>
           <div style={styles.cardDecoration} />
-          <CVInput 
-            cvText={cvText} 
+          <CVInput
+            cvText={cvText}
             setCvText={setCvText}
             industry={industry}
             setIndustry={setIndustry}
@@ -246,7 +226,7 @@ const App = () => {
       return (
         <div style={styles.mainCard}>
           <div style={styles.cardDecoration} />
-          <WizardShell 
+          <WizardShell
             onComplete={(assembledText, ind) => handleGenerate(assembledText, ind)}
             onCancel={() => setFlow('landing')}
           />
@@ -255,7 +235,12 @@ const App = () => {
     }
 
     if (flow === 'results') {
-      return <ResultTabs data={{ ...result, industry }} onReset={() => { setFlow('landing'); setResult(null); }} />;
+      return (
+        <ResultTabs
+          data={{ ...result, industry }}
+          onReset={handleReset}
+        />
+      );
     }
 
     return null;
@@ -264,32 +249,36 @@ const App = () => {
   return (
     <div style={styles.app}>
       <nav style={styles.nav}>
-        <div style={styles.logo} onClick={() => setFlow('landing')}>
-          <span style={{ fontSize: '1.8rem' }}>🎯</span>
-          <span>GT BUILDER</span>
+        <div style={styles.logo} onClick={() => setFlow('marketing')}>
+          <span style={{ fontSize: '1.6rem' }}>🎯</span>
+          <span style={{ background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GT BUILDER</span>
+          <span style={styles.badge}>Nigeria Edition</span>
         </div>
-        <div style={styles.badge}>Nigeria Edition</div>
+        <button
+          onClick={() => setFlow('landing')}
+          style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', padding: '8px 16px', borderRadius: '20px', border: '1px solid var(--border)' }}
+        >
+          {flow === 'results' ? '↺ Start Over' : '← Back'}
+        </button>
       </nav>
 
       <main style={styles.main}>
-        <header style={styles.hero}>
-          <div style={styles.heroTag}>Powered by DeepSeek-V3</div>
-          <h1 style={styles.headline}>Rewrite Your Future.</h1>
-          <p style={styles.subheadline}>Transform your raw experience into a high-impact, industry-optimized CV tailored for Nigeria's top Graduate Trainee roles.</p>
-        </header>
-
         {error && (
           <div style={styles.errorBanner}>
             <span role="img" aria-label="warning" style={{ fontSize: '1.2rem' }}>⚠️</span> {error}
           </div>
         )}
-
         {renderContent()}
       </main>
-      
-      <footer style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-        Built for Nigerian Graduates • Processed securely with DeepSeek AI
-      </footer>
+
+      {flow !== 'results' && (
+        <footer style={{ padding: '32px 24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', borderTop: '1px solid var(--border)' }}>
+          Built for Nigerian Graduates • Powered by DeepSeek V3 •{' '}
+          <a href="https://github.com/Techcifa/cv-builder-nigeria" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-light)', textDecoration: 'none' }}>
+            GitHub →
+          </a>
+        </footer>
+      )}
     </div>
   );
 };
