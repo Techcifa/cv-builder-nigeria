@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import html2pdf from 'html2pdf.js';
 import CoverLetterTab from './tabs/CoverLetterTab';
 import LinkedInTab from './tabs/LinkedInTab';
+import TemplatePicker from './pdf/TemplatePicker';
+import TemplateModern from './pdf/TemplateModern';
+import TemplateClassic from './pdf/TemplateClassic';
+import TemplateExecutive from './pdf/TemplateExecutive';
 
 const ResultTabs = ({ data, onReset }) => {
   const [activeTab, setActiveTab] = useState('cv');
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState('modern');
 
   const { rewritten_cv, gap_analysis, certifications, cover_letter, linkedin_bio, industry } = data;
 
@@ -35,22 +40,6 @@ const ResultTabs = ({ data, onReset }) => {
     }
   };
 
-  // Build a formatted HTML string for the PDF template
-  const buildPdfHtml = () => {
-    if (!rewritten_cv) return '';
-    const lines = rewritten_cv.split('\n');
-    return lines.map(line => {
-      const sectionMatch = line.match(/^===\s*(.*?)\s*===$/);
-      if (sectionMatch) {
-        return `<h2 style="font-size:13pt;font-weight:900;color:#1f2937;border-bottom:2px solid #e5e7eb;margin:22px 0 10px 0;padding-bottom:4px;text-transform:uppercase;letter-spacing:1px;">${sectionMatch[1]}</h2>`;
-      }
-      if (line.startsWith('- ')) {
-        return `<div style="display:flex;gap:8px;margin:4px 0;"><span style="color:#6366f1;flex-shrink:0;">▪</span><span>${line.slice(2)}</span></div>`;
-      }
-      if (line.trim() === '') return '<br/>';
-      return `<p style="margin:3px 0;">${line}</p>`;
-    }).join('');
-  };
 
   const criticalCount = gap_analysis.filter(g => g.severity === 'critical').length;
   const importantCount = gap_analysis.filter(g => g.severity === 'important').length;
@@ -258,6 +247,7 @@ const ResultTabs = ({ data, onReset }) => {
         {/* CV Tab */}
         {activeTab === 'cv' && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <TemplatePicker activeTemplate={activeTemplate} onSelect={setActiveTemplate} />
             <pre style={styles.cvBox}>{rewritten_cv}</pre>
             <div style={styles.actions}>
               <button 
@@ -363,32 +353,10 @@ const ResultTabs = ({ data, onReset }) => {
 
       {/* PDF Template — positioned offscreen so html2canvas can render it */}
       <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '794px' }}>
-        <div
-          id="cv-pdf-template"
-          style={{
-            padding: '40px 44px',
-            backgroundColor: 'white',
-            color: '#1a202c',
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            lineHeight: '1.6',
-            fontSize: '10.5pt',
-            width: '794px',
-          }}
-        >
-          {/* Header */}
-          <div style={{ borderBottom: '4px solid #6366f1', paddingBottom: '18px', marginBottom: '24px' }}>
-            <h1 style={{ fontSize: '22pt', fontWeight: '900', color: '#111827', margin: '0 0 6px 0', textTransform: 'uppercase', letterSpacing: '2px', fontFamily: 'system-ui, sans-serif' }}>
-              {rewritten_cv?.split('\n')[0]?.replace(/^NAME:\s*/i, '') || 'Candidate Name'}
-            </h1>
-            <p style={{ fontSize: '9.5pt', color: '#6b7280', margin: '0', fontFamily: 'system-ui, sans-serif' }}>
-              {rewritten_cv?.split('\n')[1]?.replace(/^CONTACT:\s*/i, '') || ''}
-            </p>
-          </div>
-          {/* Body */}
-          <div
-            style={{ color: '#374151', fontFamily: 'system-ui, sans-serif', fontSize: '10pt' }}
-            dangerouslySetInnerHTML={{ __html: buildPdfHtml() }}
-          />
+        <div id="cv-pdf-template" style={{ width: '794px' }}>
+          {activeTemplate === 'modern' && <TemplateModern cvText={rewritten_cv} />}
+          {activeTemplate === 'classic' && <TemplateClassic cvText={rewritten_cv} />}
+          {activeTemplate === 'executive' && <TemplateExecutive cvText={rewritten_cv} />}
         </div>
       </div>
     </div>
