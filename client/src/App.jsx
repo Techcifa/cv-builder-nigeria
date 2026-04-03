@@ -211,7 +211,7 @@ const App = () => {
 
       <main style={styles.main}>
         <section style={styles.hero}>
-          <div style={styles.heroTag}>Powered by Gemini 2.0 Flash Lite</div>
+          <div style={styles.heroTag}>Powered by DeepSeek-V3</div>
           <h1 style={styles.headline}>Rewrite Your Future.</h1>
           <p style={styles.subheadline}>Transform your raw experience into a high-impact, industry-optimized CV tailored for Nigeria's top Graduate Trainee roles.</p>
           
@@ -263,7 +263,7 @@ const App = () => {
       </main>
       
       <footer style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-        Built for Nigerian Graduates • Processed securely with Google AI
+        Built for Nigerian Graduates • Processed securely with DeepSeek AI
       </footer>
     </div>
   );

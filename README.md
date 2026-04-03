@@ -1,9 +1,9 @@
 # GT CV Builder — Nigeria Edition
 
-A production-ready web application for Nigerian graduate students to optimize their CVs for specific industries (Banking, FMCG, Consulting, or Oil & Gas) using Gemini AI.
+A production-ready web application for Nigerian graduate students to optimize their CVs for specific industries (Banking, FMCG, Consulting, or Oil & Gas) using DeepSeek AI.
 
 ## Project Structure
-- `server/`: Node.js + Express backend with Gemini SDK.
+- `server/`: Node.js + Express backend with DeepSeek API integration.
 - `client/`: React + Vite frontend with premium inline styling.
 
 ## Deployment on Render
@@ -11,7 +11,7 @@ A production-ready web application for Nigerian graduate students to optimize th
 1. **Create a Web Service** on Render.
 2. **Connect your Repo** (GitHub/GitLab).
 3. **Environment Variables**:
-   - `GEMINI_API_KEY`: Your Google AI Studio key.
+   - `DEEPSEEK_API_KEY`: Your DeepSeek platform API key.
    - `PORT`: (Render sets this automatically).
 4. **Build Command**: `npm run build`
 5. **Start Command**: `npm start`
@@ -29,9 +29,9 @@ The root `package.json` handles the client build and server launch automatically
    ```bash
    npm install
    ```
-3. Add your Gemini API Key to the `.env` file:
+3. Add your DeepSeek API Key to the `.env` file:
    ```
-   GEMINI_API_KEY=your_actual_key_here
+   DEEPSEEK_API_KEY=your_actual_key_here
    PORT=5000
    ```
 4. Start the server:
