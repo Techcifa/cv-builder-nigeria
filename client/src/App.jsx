@@ -4,6 +4,9 @@ import CVInput from './components/CVInput';
 import WizardShell from './components/wizard/WizardShell';
 import ResultTabs from './components/ResultTabs';
 import FlowSelector from './components/FlowSelector';
+import AuthModal from './components/AuthModal';
+import Dashboard from './pages/Dashboard';
+import { supabase } from './lib/supabase';
 
 const App = () => {
   const [flow, setFlow] = useState('marketing'); // 'marketing', 'landing', 'paste', 'wizard', 'results'
@@ -12,6 +15,20 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  React.useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleGenerate = async (inputText, targetIndustry) => {
     setLoading(true);
@@ -30,7 +47,14 @@ const App = () => {
         throw new Error(data.error || 'Failed to generate CV.');
       }
 
-      setResult(data);
+      const mergedData = { ...data, industry: targetIndustry };
+
+      if (user) {
+        supabase.from('cv_results').insert([{ user_id: user.id, data: mergedData }])
+          .then(({ error: saveError }) => { if (saveError) console.error("Auto-save failed", saveError) });
+      }
+
+      setResult(mergedData);
       setIndustry(targetIndustry);
       setFlow('results');
     } catch (err) {
@@ -193,6 +217,20 @@ const App = () => {
       );
     }
 
+    if (flow === 'dashboard') {
+      return (
+        <Dashboard 
+          user={user} 
+          onBack={() => setFlow('landing')} 
+          onViewCV={(cvData) => {
+            setResult(cvData);
+            setIndustry(cvData.industry);
+            setFlow('results');
+          }}
+        />
+      );
+    }
+
     if (flow === 'landing') {
       return (
         <>
@@ -254,12 +292,31 @@ const App = () => {
           <span style={{ background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GT BUILDER</span>
           <span style={styles.badge}>Nigeria Edition</span>
         </div>
-        <button
-          onClick={() => setFlow('landing')}
-          style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', padding: '8px 16px', borderRadius: '20px', border: '1px solid var(--border)' }}
-        >
-          {flow === 'results' ? '↺ Start Over' : '← Back'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {user ? (
+            <button
+              onClick={() => { setFlow('dashboard'); setResult(null); }}
+              style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', padding: '8px 16px', borderRadius: '20px', border: '1px solid var(--border)' }}
+            >
+              My CVs
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', padding: '8px 16px', borderRadius: '20px', border: '1px solid var(--border)' }}
+            >
+              Log In
+            </button>
+          )}
+          {flow !== 'marketing' && flow !== 'landing' && (
+            <button
+              onClick={() => setFlow('landing')}
+              style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', padding: '8px 16px', borderRadius: '20px', border: '1px solid var(--border)' }}
+            >
+              {flow === 'results' ? '↺ Start Over' : '← Back'}
+            </button>
+          )}
+        </div>
       </nav>
 
       <main style={styles.main}>
@@ -279,6 +336,8 @@ const App = () => {
           </a>
         </footer>
       )}
+
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </div>
   );
 };
