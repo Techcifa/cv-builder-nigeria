@@ -45,13 +45,13 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
       lineHeight: '1.6',
     },
     counter: {
-      position: 'absolute',
-      bottom: '-30px',
-      right: '8px',
-      fontSize: '0.8rem',
+      marginTop: '8px',
+      textAlign: 'right',
+      fontSize: '0.78rem',
       fontWeight: '600',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'flex-end',
       gap: '6px',
     },
     grid: {
@@ -126,7 +126,8 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
       <div style={styles.textareaContainer}>
         <label style={styles.label}>1. Paste Your Current CV</label>
         <textarea
-          style={styles.textarea}
+          className="form-input"
+          style={{ ...styles.textarea, minHeight: '280px' }}
           placeholder="Paste your raw CV text here (no formatting needed)..."
           value={cvText}
           onChange={(e) => setCvText(e.target.value)}
@@ -159,9 +160,9 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
       </div>
 
       <div style={styles.tipBox}>
-        <span style={{ fontSize: '1.2rem', marginTop: '-2px' }}>💡</span>
+        <span style={{ fontSize: '1.2rem', marginTop: '-2px', flexShrink: 0 }}>💡</span>
         <div>
-          <strong>Recruiter Tip:</strong> Focus on achievements rather than duties. Our AI will automatically convert your bullets into the high-performing **CAR (Challenge-Action-Result)** format.
+          <strong>Recruiter Tip:</strong> Focus on achievements rather than duties. Our AI will automatically convert your bullets into the high-performing <strong>CAR (Challenge-Action-Result)</strong> format.
         </div>
       </div>
 
