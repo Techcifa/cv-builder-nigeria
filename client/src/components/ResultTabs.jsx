@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import html2pdf from 'html2pdf.js';
+import React, { useMemo, useState } from 'react';
 import CoverLetterTab from './tabs/CoverLetterTab';
 import LinkedInTab from './tabs/LinkedInTab';
 import TemplatePicker from './pdf/TemplatePicker';
 import TemplateModern from './pdf/TemplateModern';
 import TemplateClassic from './pdf/TemplateClassic';
 import TemplateExecutive from './pdf/TemplateExecutive';
+
+const TAB_CONFIG = [
+  { id: 'cv', label: 'CV Rewrite' },
+  { id: 'gaps', label: 'Gap Analysis' },
+  { id: 'certs', label: 'Certifications' },
+  { id: 'cover', label: 'Cover Letter' },
+  { id: 'linkedin', label: 'LinkedIn Bio' },
+];
 
 const ResultTabs = ({ data, onReset }) => {
   const [activeTab, setActiveTab] = useState('cv');
@@ -15,348 +22,155 @@ const ResultTabs = ({ data, onReset }) => {
 
   const { rewritten_cv, gap_analysis, certifications, cover_letter, linkedin_bio, industry } = data;
 
+  const criticalCount = useMemo(() => gap_analysis.filter((item) => item.severity === 'critical').length, [gap_analysis]);
+  const importantCount = useMemo(() => gap_analysis.filter((item) => item.severity === 'important').length, [gap_analysis]);
+  const niceCount = useMemo(() => gap_analysis.filter((item) => item.severity === 'nice-to-have').length, [gap_analysis]);
+
+  const sortedGaps = useMemo(() => {
+    const order = { critical: 0, important: 1, 'nice-to-have': 2 };
+    return [...gap_analysis].sort((a, b) => order[a.severity] - order[b.severity]);
+  }, [gap_analysis]);
+
+  const handleTabKeyDown = (event, currentIndex) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    event.preventDefault();
+    const nextIndex =
+      event.key === 'ArrowRight'
+        ? (currentIndex + 1) % TAB_CONFIG.length
+        : (currentIndex - 1 + TAB_CONFIG.length) % TAB_CONFIG.length;
+    setActiveTab(TAB_CONFIG[nextIndex].id);
+  };
+
   const handleCopy = () => {
     navigator.clipboard.writeText(rewritten_cv || '');
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 1800);
   };
 
   const handleDownloadPDF = async () => {
     setPdfLoading(true);
     try {
+      const html2pdf = (await import('html2pdf.js')).default;
       const element = document.getElementById('cv-pdf-template');
       const opt = {
-        margin:       [12, 12, 12, 12],
-        filename:     `GT_CV_${(industry || 'EXPERT').toUpperCase()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin: [12, 12, 12, 12],
+        filename: `GT_CV_${(industry || 'EXPERT').toUpperCase()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
       await html2pdf().set(opt).from(element).save();
-    } catch (e) {
-      console.error('PDF generation failed:', e);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
     } finally {
       setPdfLoading(false);
     }
   };
 
-
-  const criticalCount = gap_analysis.filter(g => g.severity === 'critical').length;
-  const importantCount = gap_analysis.filter(g => g.severity === 'important').length;
-  const niceCount = gap_analysis.filter(g => g.severity === 'nice-to-have').length;
-
-  const sortedGaps = [...gap_analysis].sort((a, b) => {
-    const order = { critical: 0, important: 1, 'nice-to-have': 2 };
-    return order[a.severity] - order[b.severity];
-  });
-
-  const TAB_CONFIG = [
-    { id: 'cv',       icon: '📄', label: 'CV',          labelFull: 'CV Rewrite' },
-    { id: 'gaps',     icon: '⚠️', label: 'Gaps',        labelFull: 'Gap Analysis' },
-    { id: 'certs',    icon: '🎓', label: 'Certs',       labelFull: 'Certifications' },
-    { id: 'cover',    icon: '📝', label: 'Cover',       labelFull: 'Cover Letter' },
-    { id: 'linkedin', icon: '💼', label: 'LinkedIn',    labelFull: 'LinkedIn Bio' },
-  ];
-
-  const styles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '32px',
-      position: 'relative',
-      zIndex: '1',
-    },
-    tabs: {
-      display: 'flex',
-      gap: '8px',
-      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-      padding: '6px',
-      borderRadius: 'var(--radius)',
-      border: '1px solid var(--border)',
-      overflowX: 'auto',
-      WebkitOverflowScrolling: 'touch',
-      scrollbarWidth: 'none',
-      msOverflowStyle: 'none',
-    },
-    tab: (isActive) => ({
-      flex: '1 0 auto',
-      minWidth: '80px',
-      padding: '10px 14px',
-      borderRadius: '10px',
-      fontSize: '0.8rem',
-      fontWeight: '800',
-      backgroundColor: isActive ? 'var(--accent)' : 'transparent',
-      color: isActive ? 'white' : 'var(--text-muted)',
-      textAlign: 'center',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      boxShadow: isActive ? '0 8px 20px var(--accent-glow)' : 'none',
-      whiteSpace: 'nowrap',
-    }),
-    cvBox: {
-      backgroundColor: 'var(--bg)',
-      border: '1px solid var(--border)',
-      borderLeft: '4px solid var(--accent)',
-      borderRadius: 'var(--radius)',
-      padding: '28px',
-      fontFamily: '"Fira Code", "Courier New", monospace',
-      fontSize: '0.9rem',
-      lineHeight: '1.7',
-      maxHeight: '600px',
-      overflowY: 'auto',
-      whiteSpace: 'pre-wrap',
-      color: 'var(--text)',
-      boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)',
-    },
-    actions: {
-      display: 'flex',
-      gap: '12px',
-      marginTop: '20px',
-      flexWrap: 'wrap',
-    },
-    btn: {
-      flex: '1 1 140px',
-      padding: '14px 16px',
-      borderRadius: '12px',
-      fontSize: '0.9rem',
-      fontWeight: '700',
-      backgroundColor: 'var(--surface2)',
-      border: '1px solid var(--border)',
-      color: 'var(--text)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-      transition: 'all 0.3s ease',
-    },
-    summaryLine: {
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      padding: '14px 20px',
-      backgroundColor: 'rgba(99, 102, 241, 0.05)',
-      borderRadius: 'var(--radius)',
-      marginBottom: '24px',
-      textAlign: 'center',
-      border: '1px solid var(--accent-glow)',
-      color: 'var(--accent-light)',
-      display: 'flex',
-      justifyContent: 'center',
-      flexWrap: 'wrap',
-      gap: '16px',
-    },
-    gapCard: (sev) => ({
-      backgroundColor: 'rgba(255, 255, 255, 0.02)',
-      borderRadius: 'var(--radius)',
-      padding: '24px',
-      marginBottom: '16px',
-      border: '1px solid var(--border)',
-      borderLeft: `6px solid ${sev === 'critical' ? 'var(--red)' : sev === 'important' ? 'var(--yellow)' : 'var(--green)'}`,
-      transition: 'transform 0.3s ease',
-    }),
-    badge: (sev) => ({
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px',
-      fontSize: '0.7rem',
-      fontWeight: '900',
-      textTransform: 'uppercase',
-      padding: '5px 10px',
-      borderRadius: '6px',
-      marginBottom: '14px',
-      backgroundColor: sev === 'critical' ? 'var(--red-alpha)' : sev === 'important' ? 'var(--yellow-alpha)' : 'var(--green-alpha)',
-      color: sev === 'critical' ? 'var(--red)' : sev === 'important' ? 'var(--yellow)' : 'var(--green)',
-      border: `1px solid ${sev === 'critical' ? 'rgba(239,68,68,0.3)' : sev === 'important' ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'}`,
-      letterSpacing: '1px',
-    }),
-    fixTag: {
-      display: 'inline-flex',
-      alignItems: 'flex-start',
-      gap: '8px',
-      marginTop: '16px',
-      fontSize: '0.85rem',
-      fontWeight: '700',
-      padding: '10px 16px',
-      backgroundColor: 'rgba(16, 185, 129, 0.05)',
-      borderRadius: '12px',
-      color: 'var(--green)',
-      border: '1px solid rgba(16, 185, 129, 0.2)',
-      lineHeight: '1.5',
-    },
-    certCard: {
-      backgroundColor: 'rgba(255, 255, 255, 0.02)',
-      borderRadius: 'var(--radius)',
-      padding: '28px',
-      marginBottom: '16px',
-      border: '1px solid var(--border)',
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    chipRow: {
-      display: 'flex',
-      gap: '10px',
-      margin: '16px 0',
-      flexWrap: 'wrap',
-    },
-    chip: (colorVar) => ({
-      fontSize: '0.78rem',
-      fontWeight: '700',
-      padding: '5px 12px',
-      borderRadius: '8px',
-      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-      border: `1px solid var(${colorVar})`,
-      color: `var(${colorVar})`,
-    }),
-    resetBtn: {
-      marginTop: '24px',
-      padding: '12px 28px',
-      color: 'var(--text-muted)',
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      backgroundColor: 'transparent',
-      border: '1px solid var(--border)',
-      borderRadius: '30px',
-      alignSelf: 'center',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      transition: 'all 0.3s ease',
-    }
-  };
-
   return (
-    <div style={styles.container}>
-      {/* Tab Navigation */}
-      <div style={styles.tabs} role="tablist">
-        {TAB_CONFIG.map(t => (
+    <div className="result-shell">
+      <div className="result-tabs" role="tablist" aria-label="Result sections">
+        {TAB_CONFIG.map((tab, index) => (
+          // roving behavior for left/right keys
           <button
-            key={t.id}
+            key={tab.id}
+            type="button"
             role="tab"
-            aria-selected={activeTab === t.id}
-            style={styles.tab(activeTab === t.id)}
-            onClick={() => setActiveTab(t.id)}
+            className={`result-tab ${activeTab === tab.id ? 'active' : ''}`}
+            aria-selected={activeTab === tab.id}
+            aria-controls={`panel-${tab.id}`}
+            id={`tab-${tab.id}`}
+            onClick={() => setActiveTab(tab.id)}
+            onKeyDown={(event) => handleTabKeyDown(event, index)}
           >
-            <span style={{ marginRight: '6px' }}>{t.icon}</span>
-            <span className="tab-label-full">{t.labelFull}</span>
-            <span className="tab-label-short">{t.label}</span>
+            {tab.label}
           </button>
         ))}
       </div>
 
-      <div style={{ animation: 'fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}>
-        {/* CV Tab */}
-        {activeTab === 'cv' && (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <section className="result-panel" role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+        {activeTab === 'cv' ? (
+          <div className="stack-16">
             <TemplatePicker activeTemplate={activeTemplate} onSelect={setActiveTemplate} />
-            <pre style={styles.cvBox}>{rewritten_cv}</pre>
-            <div style={styles.actions}>
-              <button 
-                style={{ ...styles.btn, backgroundColor: copied ? 'var(--green)' : 'var(--surface2)', color: 'white', borderColor: copied ? 'var(--green)' : 'var(--border)' }} 
-                onClick={handleCopy}
-              >
-                {copied ? '✓ COPIED' : '📋 COPY CV'}
+            <pre className="result-code">{rewritten_cv}</pre>
+            <div className="result-actions">
+              <button type="button" className="btn" onClick={handleCopy}>
+                {copied ? 'Copied' : 'Copy CV Text'}
               </button>
-              <button
-                style={{ ...styles.btn, backgroundColor: pdfLoading ? 'var(--surface2)' : 'var(--accent)', color: 'white', borderColor: 'var(--accent-glow)', opacity: pdfLoading ? 0.7 : 1 }}
-                onClick={handleDownloadPDF}
-                disabled={pdfLoading}
-              >
-                {pdfLoading ? '⏳ Generating...' : '⬇ DOWNLOAD PDF ⚡'}
+              <button type="button" className="btn btn-primary" onClick={handleDownloadPDF} disabled={pdfLoading}>
+                {pdfLoading ? 'Generating PDF...' : 'Download PDF'}
               </button>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Gap Analysis Tab */}
-        {activeTab === 'gaps' && (
-          <div>
-            <div style={styles.summaryLine}>
-              <span>🔴 {criticalCount} Critical</span>
-              <span>🟡 {importantCount} Important</span>
-              <span>🟢 {niceCount} Nice to have</span>
+        {activeTab === 'gaps' ? (
+          <div className="stack-14">
+            <div className="result-summary">
+              <span>{criticalCount} Critical</span>
+              <span>{importantCount} Important</span>
+              <span>{niceCount} Nice-to-have</span>
             </div>
-            {sortedGaps.map((gap, i) => (
-              <div key={i} style={styles.gapCard(gap.severity)}>
-                <span style={styles.badge(gap.severity)}>
-                  {gap.severity === 'critical' ? '⚠ Critical Weakness' : gap.severity === 'important' ? '↑ Priority Gap' : '◎ Growth Area'}
+            {sortedGaps.map((gap, index) => (
+              <article key={`${gap.gap}-${index}`} className={`gap-card ${gap.severity}`}>
+                <span className="gap-badge">
+                  {gap.severity === 'critical'
+                    ? 'Critical'
+                    : gap.severity === 'important'
+                    ? 'Important'
+                    : 'Nice-to-have'}
                 </span>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '10px', color: 'white', letterSpacing: '-0.5px' }}>{gap.gap}</h3>
-                <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>{gap.detail}</p>
-                <div style={styles.fixTag}>
-                  <span style={{ flexShrink: 0 }}>🚀</span>
-                  <span><strong>ACTION:</strong> {gap.fix}</span>
+                <h3>{gap.gap}</h3>
+                <p className="muted">{gap.detail}</p>
+                <div className="gap-fix">
+                  <strong>Action:</strong> {gap.fix}
                 </div>
-              </div>
+              </article>
             ))}
           </div>
-        )}
+        ) : null}
 
-        {/* Certifications Tab */}
-        {activeTab === 'certs' && (
-          <div>
-            <div style={{ marginBottom: '28px', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: '900', marginBottom: '6px' }}>Your Certification Roadmap</h2>
-              <p style={{ color: 'var(--text-muted)' }}>Top 5 recommendations to boost your {(industry || '').toUpperCase()} employability.</p>
-            </div>
-            {certifications.map((cert, i) => (
-              <div key={i} style={styles.certCard}>
-                <div style={{ position: 'absolute', top: '20px', right: '24px', fontSize: '2.5rem', fontWeight: '900', color: 'rgba(255,255,255,0.03)', pointerEvents: 'none' }}>
-                  0{i + 1}
+        {activeTab === 'certs' ? (
+          <div className="stack-12">
+            <header className="stack-6">
+              <h3 className="section-title">Certification Roadmap</h3>
+              <p className="muted">Recommendations to improve {industry || 'your'} hiring readiness.</p>
+            </header>
+            {certifications.map((cert, index) => (
+              <article key={`${cert.name}-${index}`} className="cert-card">
+                <div className="row-between align-start gap-10">
+                  <h4 className="item-title">{cert.name}</h4>
+                  <span className="muted text-2xs">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                 </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'white', maxWidth: '85%' }}>{cert.name}</h3>
-                <div style={styles.chipRow}>
-                  <span style={styles.chip('--accent-light')}>{cert.provider}</span>
-                  <span style={styles.chip(cert.cost?.toLowerCase().includes('free') ? '--green' : '--yellow')}>{cert.cost}</span>
-                  <span style={styles.chip('--text-muted')}>{cert.duration}</span>
+                <div className="cert-chip-row">
+                  <span className="cert-chip">{cert.provider}</span>
+                  <span className="cert-chip">{cert.cost}</span>
+                  <span className="cert-chip">{cert.duration}</span>
                 </div>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.6' }}>{cert.relevance}</p>
-                <a
-                  href={cert.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    color: 'var(--accent-light)',
-                    fontWeight: '800',
-                    fontSize: '0.9rem',
-                    textDecoration: 'none',
-                    borderBottom: '2px solid var(--accent-glow)',
-                    paddingBottom: '2px',
-                  }}
-                >
-                  ENROLL NOW →
+                <p className="muted">{cert.relevance}</p>
+                <a href={cert.link} target="_blank" rel="noopener noreferrer" className="cert-link">
+                  Visit course
                 </a>
-              </div>
+              </article>
             ))}
           </div>
-        )}
+        ) : null}
 
-        {activeTab === 'cover' && (
-          <CoverLetterTab content={cover_letter} industry={industry} />
-        )}
+        {activeTab === 'cover' ? <CoverLetterTab content={cover_letter} industry={industry} /> : null}
+        {activeTab === 'linkedin' ? <LinkedInTab content={linkedin_bio} /> : null}
+      </section>
 
-        {activeTab === 'linkedin' && (
-          <LinkedInTab content={linkedin_bio} />
-        )}
-      </div>
-
-      <button
-        style={styles.resetBtn}
-        onClick={onReset}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent-light)'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-      >
-        <span>↺</span> START OVER
+      <button type="button" className="btn btn-ghost center-self" onClick={onReset}>
+        Start over
       </button>
 
-      {/* PDF Template — positioned offscreen so html2canvas can render it */}
-      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '794px' }}>
-        <div id="cv-pdf-template" style={{ width: '794px' }}>
-          {activeTemplate === 'modern' && <TemplateModern cvText={rewritten_cv} />}
-          {activeTemplate === 'classic' && <TemplateClassic cvText={rewritten_cv} />}
-          {activeTemplate === 'executive' && <TemplateExecutive cvText={rewritten_cv} />}
+      <div className="pdf-offscreen">
+        <div id="cv-pdf-template" className="pdf-width">
+          {activeTemplate === 'modern' ? <TemplateModern cvText={rewritten_cv} /> : null}
+          {activeTemplate === 'classic' ? <TemplateClassic cvText={rewritten_cv} /> : null}
+          {activeTemplate === 'executive' ? <TemplateExecutive cvText={rewritten_cv} /> : null}
         </div>
       </div>
     </div>

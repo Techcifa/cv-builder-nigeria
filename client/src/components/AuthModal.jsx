@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthModal = ({ isOpen, onClose }) => {
@@ -9,10 +9,21 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState(null);
   const [msg, setMsg] = useState(null);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const onEsc = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError(null);
     setMsg(null);
@@ -25,7 +36,7 @@ const AuthModal = ({ isOpen, onClose }) => {
       } else {
         const { error: authError } = await supabase.auth.signUp({ email, password });
         if (authError) throw authError;
-        setMsg('Check your email for the confirmation link!');
+        setMsg('Check your email for the confirmation link.');
       }
     } catch (err) {
       setError(err.message || 'Authentication failed');
@@ -35,80 +46,76 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(5, 6, 8, 0.85)',
-      backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 9999
-    }}>
-      <div style={{
-        backgroundColor: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '40px',
-        width: '100%',
-        maxWidth: '400px',
-        position: 'relative',
-        animation: 'fadeIn 0.3s ease'
-      }}>
-        <button 
-          onClick={onClose}
-          style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '1.5rem', color: 'var(--text-muted)' }}
-        >
-          &times;
+    <div className="auth-overlay" onClick={onClose}>
+      <div
+        className="auth-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button type="button" className="auth-close" onClick={onClose} aria-label="Close authentication dialog">
+          x
         </button>
 
-        <h2 style={{ fontSize: '1.6rem', fontWeight: '900', marginBottom: '8px', color: 'white' }}>
+        <h2 id="auth-title" className="auth-title">
           {isLogin ? 'Welcome back' : 'Create an account'}
         </h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '32px', fontSize: '0.9rem' }}>
-          {isLogin ? 'Log in to view your saved CVs and cover letters.' : 'Sign up to automatically save your generated CVs.'}
+        <p className="auth-subtitle">
+          {isLogin
+            ? 'Log in to access your saved CV packages.'
+            : 'Sign up to save generated career packages automatically.'}
         </p>
 
-        {error && <div style={{ backgroundColor: 'var(--red-alpha)', color: 'var(--red)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', border: '1px solid rgba(239,68,68,0.3)' }}>{error}</div>}
-        {msg && <div style={{ backgroundColor: 'var(--green-alpha)', color: 'var(--green)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', border: '1px solid rgba(16,185,129,0.3)' }}>{msg}</div>}
+        {error ? <div className="auth-note auth-note-error">{error}</div> : null}
+        {msg ? <div className="auth-note auth-note-success">{msg}</div> : null}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSubmit} className="auth-form">
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>Email Address</label>
-            <input 
-              type="email" 
+            <label className="form-label" htmlFor="auth-email">
+              Email Address
+            </label>
+            <input
+              id="auth-email"
+              type="email"
               required
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="form-input" 
+              onChange={(event) => setEmail(event.target.value)}
+              className="form-input"
+              autoComplete="email"
             />
           </div>
+
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>Password</label>
-            <input 
-              type="password" 
+            <label className="form-label" htmlFor="auth-password">
+              Password
+            </label>
+            <input
+              id="auth-password"
+              type="password"
               required
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="form-input" 
+              onChange={(event) => setPassword(event.target.value)}
+              className="form-input"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
             />
           </div>
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={{
-              background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
-              color: 'white', padding: '14px', borderRadius: '10px',
-              fontSize: '1rem', fontWeight: '800', marginTop: '10px',
-              opacity: loading ? 0.7 : 1
-            }}
-          >
-            {loading ? 'Processing...' : (isLogin ? 'Log In' : 'Sign Up')}
+
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? 'Processing...' : isLogin ? 'Log In' : 'Sign Up'}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button 
-            onClick={() => { setIsLogin(!isLogin); setError(null); setMsg(null); }}
-            style={{ color: 'var(--accent-light)', fontWeight: '700', background: 'none' }}
+        <div className="auth-switch">
+          <span>{isLogin ? "Don't have an account?" : 'Already have an account?'}</span>
+          <button
+            type="button"
+            className="auth-switch-button"
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError(null);
+              setMsg(null);
+            }}
           >
             {isLogin ? 'Sign up' : 'Log in'}
           </button>

@@ -11,7 +11,7 @@ const STEP_META = [
   { label: 'Education' },
   { label: 'Experience' },
   { label: 'Skills' },
-  { label: 'Projects & Leadership' },
+  { label: 'Projects and Leadership' },
   { label: 'Target Role' },
 ];
 
@@ -24,105 +24,67 @@ const WizardShell = ({ onComplete, onCancel }) => {
     experience: [{ role: '', org: '', dates: '', bullets: '' }],
     skills: { technical: '', soft: [], languages: '' },
     projects: { finalProject: '', leadership: '', certs: '' },
-    target: { industry: '', companies: '', goal: '' }
+    target: { industry: '', companies: '', goal: '' },
   });
 
   const updateSection = (section, field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [section]: { ...prev[section], [field]: value }
+      [section]: { ...prev[section], [field]: value },
     }));
   };
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 6));
-  const prevStep = () => setStep(s => Math.max(s - 1, 1));
-
-  const handleFinish = () => {
-    onComplete(formData, formData.target.industry);
-  };
-
+  const nextStep = () => setStep((current) => Math.min(current + 1, 6));
+  const prevStep = () => setStep((current) => Math.max(current - 1, 1));
   const progress = (step / 6) * 100;
 
   const canGoNext = () => {
     if (step === 1) return formData.personal.name && formData.personal.email;
     if (step === 2) return formData.education.degree && formData.education.institution;
-    if (step === 6) return !!formData.target.industry;
+    if (step === 6) return Boolean(formData.target.industry);
     return true;
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && canGoNext() && step < 6) {
-      e.preventDefault();
-      nextStep();
-    }
+  const handleFinish = () => {
+    onComplete(formData, formData.target.industry);
   };
 
   return (
-    <div style={{ position: 'relative' }} onKeyDown={handleKeyDown}>
-      {/* Progress Bar */}
+    <div>
       <div className="wizard-progress">
         <div className="wizard-progress-bar" style={{ width: `${progress}%` }} />
       </div>
       <div className="wizard-step-label">
-        Step <span>{step}</span> of 6 — <span>{STEP_META[step - 1].label}</span>
+        Step <span>{step}</span> of 6 - <span>{STEP_META[step - 1].label}</span>
       </div>
 
-      {/* Step Content */}
-      <div style={{ minHeight: '380px' }}>
-        {step === 1 && <Step1Personal data={formData.personal} update={(f, v) => updateSection('personal', f, v)} />}
-        {step === 2 && <Step2Education data={formData.education} update={(f, v) => updateSection('education', f, v)} />}
+      <div style={{ minHeight: 360 }}>
+        {step === 1 && <Step1Personal data={formData.personal} update={(field, value) => updateSection('personal', field, value)} />}
+        {step === 2 && <Step2Education data={formData.education} update={(field, value) => updateSection('education', field, value)} />}
         {step === 3 && (
           <Step3Experience
             hasExperience={formData.hasExperience}
             experience={formData.experience}
-            setHasExperience={v => setFormData(p => ({ ...p, hasExperience: v }))}
-            setExperience={v => setFormData(p => ({ ...p, experience: v }))}
+            setHasExperience={(value) => setFormData((prev) => ({ ...prev, hasExperience: value }))}
+            setExperience={(value) => setFormData((prev) => ({ ...prev, experience: value }))}
           />
         )}
-        {step === 4 && <Step4Skills data={formData.skills} update={(f, v) => updateSection('skills', f, v)} />}
-        {step === 5 && <Step5Projects data={formData.projects} update={(f, v) => updateSection('projects', f, v)} />}
-        {step === 6 && <Step6Target data={formData.target} update={(f, v) => updateSection('target', f, v)} />}
+        {step === 4 && <Step4Skills data={formData.skills} update={(field, value) => updateSection('skills', field, value)} />}
+        {step === 5 && <Step5Projects data={formData.projects} update={(field, value) => updateSection('projects', field, value)} />}
+        {step === 6 && <Step6Target data={formData.target} update={(field, value) => updateSection('target', field, value)} />}
       </div>
 
-      {/* Navigation */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: '40px',
-        paddingTop: '28px',
-        borderTop: '1px solid var(--border)',
-        gap: '16px',
-        flexWrap: 'wrap',
-      }}>
-        <button
-          className="chip-label"
-          onClick={step === 1 ? onCancel : prevStep}
-          style={{ minWidth: '90px', textAlign: 'center' }}
-        >
-          {step === 1 ? '← Cancel' : '← Back'}
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+        <button type="button" className="btn btn-ghost" onClick={step === 1 ? onCancel : prevStep}>
+          {step === 1 ? 'Cancel' : 'Back'}
         </button>
         <button
-          style={{
-            background: step === 6
-              ? 'linear-gradient(135deg, var(--accent), var(--accent2))'
-              : 'var(--accent)',
-            padding: '13px 36px',
-            borderRadius: '10px',
-            color: 'white',
-            fontWeight: '800',
-            fontSize: '0.95rem',
-            opacity: canGoNext() ? 1 : 0.4,
-            cursor: canGoNext() ? 'pointer' : 'not-allowed',
-            boxShadow: canGoNext() ? '0 8px 24px var(--accent-glow)' : 'none',
-            transition: 'all 0.3s ease',
-            flex: '1',
-            maxWidth: '280px',
-          }}
-          onClick={step === 6 ? handleFinish : nextStep}
+          type="button"
+          className="btn btn-primary"
           disabled={!canGoNext()}
+          onClick={step === 6 ? handleFinish : nextStep}
         >
-          {step === 6 ? '⚡ GENERATE AI CV' : 'Next Step →'}
+          {step === 6 ? 'Generate Career Package' : 'Continue'}
         </button>
       </div>
     </div>
