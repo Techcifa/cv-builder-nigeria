@@ -139,7 +139,7 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
 
       <div>
         <label style={styles.label}>2. Select Target Industry</label>
-        <div style={styles.grid}>
+        <div className="responsive-grid">
           {industries.map((ind) => (
             <button
               key={ind.id}
