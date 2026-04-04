@@ -7,11 +7,11 @@ import TemplateClassic from './pdf/TemplateClassic';
 import TemplateExecutive from './pdf/TemplateExecutive';
 
 const TAB_CONFIG = [
-  { id: 'cv', label: 'CV Rewrite' },
-  { id: 'gaps', label: 'Gap Analysis' },
+  { id: 'cv', label: 'CV' },
+  { id: 'gaps', label: 'Gaps' },
   { id: 'certs', label: 'Certifications' },
-  { id: 'cover', label: 'Cover Letter' },
-  { id: 'linkedin', label: 'LinkedIn Bio' },
+  { id: 'cover', label: 'Cover' },
+  { id: 'linkedin', label: 'LinkedIn' },
 ];
 
 const ResultTabs = ({ data, onReset }) => {
@@ -122,7 +122,7 @@ const ResultTabs = ({ data, onReset }) => {
             <pre className="result-code">{rewrittenCV || 'CV rewrite not available.'}</pre>
             <div className="result-actions">
               <button type="button" className="btn" onClick={handleCopy}>
-                {copied ? 'Copied' : 'Copy CV Text'}
+                {copied ? 'Copied' : 'Copy CV'}
               </button>
               <button type="button" className="btn btn-primary" onClick={handleDownloadPDF} disabled={pdfLoading}>
                 {pdfLoading ? 'Generating PDF...' : 'Download PDF'}
@@ -191,7 +191,7 @@ const ResultTabs = ({ data, onReset }) => {
       </section>
 
       <button type="button" className="btn btn-ghost center-self" onClick={onReset}>
-        Start over
+        Create Another Package
       </button>
 
       <div className="pdf-offscreen">

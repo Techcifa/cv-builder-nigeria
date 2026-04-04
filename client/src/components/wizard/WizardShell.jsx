@@ -84,7 +84,7 @@ const WizardShell = ({ onComplete, onCancel }) => {
           disabled={!canGoNext()}
           onClick={step === 6 ? handleFinish : nextStep}
         >
-          {step === 6 ? 'Generate Career Package' : 'Continue'}
+          {step === 6 ? 'Generate Application Suite' : 'Continue'}
         </button>
       </div>
     </div>

@@ -63,8 +63,8 @@ const AuthModal = ({ isOpen, onClose }) => {
         </h2>
         <p className="auth-subtitle">
           {isLogin
-            ? 'Log in to access your saved CV packages.'
-            : 'Sign up to save generated career packages automatically.'}
+            ? 'Log in to access your saved application suites.'
+            : 'Sign up to save generated application suites automatically.'}
         </p>
 
         {error ? <div className="auth-note auth-note-error">{error}</div> : null}

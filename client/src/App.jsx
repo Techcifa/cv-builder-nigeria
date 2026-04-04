@@ -1,21 +1,24 @@
-import React, { Suspense, lazy, useState } from 'react';
+import React, { Suspense, lazy, useMemo, useState } from 'react';
 import CVInput from './components/CVInput';
 import WizardShell from './components/wizard/WizardShell';
 import FlowSelector from './components/FlowSelector';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 
-const Landing = lazy(() => import('./pages/Landing'));
 const ResultTabs = lazy(() => import('./components/ResultTabs'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AuthModal = lazy(() => import('./components/AuthModal'));
 
+const JOURNEY = ['Home', 'Build', 'Results'];
+
 const App = () => {
-  const [flow, setFlow] = useState('marketing');
+  const [stage, setStage] = useState('home');
+  const [mode, setMode] = useState('');
   const [cvText, setCvText] = useState('');
   const [industry, setIndustry] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [lastRequest, setLastRequest] = useState(null);
   const [user, setUser] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -35,7 +38,22 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const stageIndex = useMemo(() => {
+    if (stage === 'home') return 0;
+    if (stage === 'builder') return 1;
+    if (stage === 'results') return 2;
+    return 0;
+  }, [stage]);
+
+  const startBuilder = (selectedMode) => {
+    setMode(selectedMode);
+    setError('');
+    setStage('builder');
+  };
+
   const handleGenerate = async (inputText, targetIndustry) => {
+    const requestPayload = { inputText, targetIndustry };
+    setLastRequest(requestPayload);
     setLoading(true);
     setError('');
 
@@ -47,7 +65,7 @@ const App = () => {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to generate package.');
+      if (!response.ok) throw new Error(data.error || 'Failed to generate application suite.');
 
       const mergedData = { ...data, industry: targetIndustry };
 
@@ -62,12 +80,12 @@ const App = () => {
 
       setResult(mergedData);
       setIndustry(targetIndustry);
-      setFlow('results');
+      setStage('results');
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('quota')) {
-        setError('API limits reached. Please retry in about 60 seconds.');
+        setError('API limit reached. Retry in about 60 seconds.');
       } else {
-        setError(err.message || 'Unexpected error. Check connection and try again.');
+        setError(err.message || 'Unexpected error. Check your connection and try again.');
       }
     } finally {
       setLoading(false);
@@ -75,9 +93,16 @@ const App = () => {
   };
 
   const handleReset = () => {
-    setFlow('landing');
+    setMode('');
     setResult(null);
     setError('');
+    setLoading(false);
+    setStage('home');
+  };
+
+  const retryLastRequest = () => {
+    if (!lastRequest || loading) return;
+    handleGenerate(lastRequest.inputText, lastRequest.targetIndustry);
   };
 
   const loadingFallback = (
@@ -87,89 +112,118 @@ const App = () => {
     </div>
   );
 
-  if (flow === 'marketing') {
-    return (
-      <Suspense fallback={loadingFallback}>
-        <Landing onStart={() => setFlow('landing')} />
-      </Suspense>
-    );
-  }
+  const renderHome = () => (
+    <section className="stack-16">
+      <header className="hero-stack app-hero fade-in">
+        <span className="kicker">One Clear Workflow</span>
+        <h1 className="hero-title hero-title-compact">Build a premium application suite without the UI noise.</h1>
+        <p className="hero-copy">
+          Choose your start mode once, generate once, and leave with a polished CV, gap roadmap, certifications,
+          cover letter, and LinkedIn copy.
+        </p>
+      </header>
 
-  const renderContent = () => {
-    if (loading) {
-      return (
+      <div className="journey-strip panel panel-pad fade-in fade-in-delay-1">
+        <h2 className="section-title">How it works</h2>
+        <div className="journey-points">
+          <div className="journey-point">
+            <strong>1. Choose input mode</strong>
+            <p className="muted">Paste a draft CV or use guided questions.</p>
+          </div>
+          <div className="journey-point">
+            <strong>2. Generate suite</strong>
+            <p className="muted">AI produces all core application assets in one run.</p>
+          </div>
+          <div className="journey-point">
+            <strong>3. Export and improve</strong>
+            <p className="muted">Download PDF, copy text, and close top hiring gaps.</p>
+          </div>
+        </div>
+      </div>
+
+      <section className="panel panel-pad fade-in fade-in-delay-2">
+        <div className="section-head">
+          <h2>Pick your start mode</h2>
+          <p>No repeated pages. No dead ends. You can switch modes anytime before generating.</p>
+        </div>
+        <FlowSelector onSelect={startBuilder} />
+      </section>
+    </section>
+  );
+
+  const renderBuilder = () => (
+    <section className="builder-pane fade-in">
+      <div className="builder-toolbar">
+        <div className="mode-switch" role="tablist" aria-label="Builder mode">
+          <button
+            type="button"
+            className={`mode-pill ${mode === 'paste' ? 'active' : ''}`}
+            onClick={() => startBuilder('paste')}
+            aria-selected={mode === 'paste'}
+          >
+            CV Optimization
+          </button>
+          <button
+            type="button"
+            className={`mode-pill ${mode === 'wizard' ? 'active' : ''}`}
+            onClick={() => startBuilder('wizard')}
+            aria-selected={mode === 'wizard'}
+          >
+            Guided Builder
+          </button>
+        </div>
+        <button type="button" className="btn btn-ghost" onClick={handleReset}>
+          Back to Home
+        </button>
+      </div>
+
+      {loading ? (
         <div className="loader panel">
           <div className="spinner" />
-          <p className="loader-title">Generating your career package...</p>
-          <p className="muted mt-8">
-            This usually takes less than a minute.
-          </p>
+          <p className="loader-title">Generating your application suite...</p>
+          <p className="muted mt-8">Usually under one minute.</p>
         </div>
-      );
-    }
+      ) : mode === 'paste' ? (
+        <CVInput
+          cvText={cvText}
+          setCvText={setCvText}
+          industry={industry}
+          setIndustry={setIndustry}
+          onSubmit={() => handleGenerate(cvText, industry)}
+          loading={loading}
+        />
+      ) : (
+        <WizardShell
+          onComplete={(assembledData, selectedIndustry) => handleGenerate(assembledData, selectedIndustry)}
+          onCancel={handleReset}
+        />
+      )}
+    </section>
+  );
 
-    if (flow === 'dashboard') {
+  const renderContent = () => {
+    if (stage === 'dashboard') {
       return (
         <Suspense fallback={loadingFallback}>
           <Dashboard
             user={user}
-            onBack={() => setFlow('landing')}
+            onBack={handleReset}
             onViewCV={(cvData) => {
               setResult(cvData);
-              setIndustry(cvData.industry);
-              setFlow('results');
+              setIndustry(cvData?.industry || '');
+              setStage('results');
             }}
           />
         </Suspense>
       );
     }
 
-    if (flow === 'landing') {
-      return (
-        <section>
-          <header className="hero-stack hero-stack-compact">
-            <span className="kicker">Choose Start Mode</span>
-            <h1 className="hero-title hero-title-compact">
-              Select how you want to begin.
-            </h1>
-            <p className="hero-copy">
-              Start with your current CV draft or use the guided six-step builder for a complete profile from scratch.
-            </p>
-          </header>
-          <FlowSelector onSelect={setFlow} />
-        </section>
-      );
-    }
+    if (stage === 'home') return renderHome();
+    if (stage === 'builder') return renderBuilder();
 
-    if (flow === 'paste') {
+    if (stage === 'results') {
       return (
-        <section className="builder-pane">
-          <CVInput
-            cvText={cvText}
-            setCvText={setCvText}
-            industry={industry}
-            setIndustry={setIndustry}
-            onSubmit={() => handleGenerate(cvText, industry)}
-            loading={loading}
-          />
-        </section>
-      );
-    }
-
-    if (flow === 'wizard') {
-      return (
-        <section className="builder-pane">
-          <WizardShell
-            onComplete={(assembledText, selectedIndustry) => handleGenerate(assembledText, selectedIndustry)}
-            onCancel={() => setFlow('landing')}
-          />
-        </section>
-      );
-    }
-
-    if (flow === 'results') {
-      return (
-        <section className="builder-pane">
+        <section className="builder-pane fade-in">
           <Suspense fallback={loadingFallback}>
             <ResultTabs data={{ ...result, industry }} onReset={handleReset} />
           </Suspense>
@@ -184,20 +238,16 @@ const App = () => {
     <div className="site-shell">
       <header className="app-nav">
         <div className="container app-nav-inner">
-          <button
-            type="button"
-            className="brand brand-button"
-            onClick={() => setFlow('marketing')}
-          >
+          <button type="button" className="brand brand-button" onClick={handleReset}>
             <span className="brand-mark" aria-hidden="true" />
             <span>GT Builder</span>
             <span className="badge">Nigeria Edition</span>
           </button>
 
           <div className="nav-actions">
-            {user ? (
-              <button type="button" className="btn btn-ghost" onClick={() => setFlow('dashboard')}>
-                My Packages
+            {isSupabaseConfigured && user ? (
+              <button type="button" className="btn btn-ghost" onClick={() => setStage('dashboard')}>
+                My Suites
               </button>
             ) : isSupabaseConfigured ? (
               <button type="button" className="btn btn-ghost" onClick={() => setIsAuthOpen(true)}>
@@ -205,29 +255,47 @@ const App = () => {
               </button>
             ) : null}
 
-            {flow !== 'marketing' && flow !== 'landing' && (
-              <button type="button" className="btn" onClick={() => setFlow('landing')}>
-                {flow === 'results' ? 'Start Over' : 'Back'}
+            {stage !== 'home' ? (
+              <button type="button" className="btn" onClick={handleReset}>
+                New Suite
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
 
       <main className="main-area">
-        {error ? <div className="error-banner">{error}</div> : null}
+        {stage !== 'dashboard' ? (
+          <div className="stage-track" aria-label="Workflow progress">
+            {JOURNEY.map((label, index) => (
+              <div
+                key={label}
+                className={`stage-pill ${index <= stageIndex ? 'active' : ''} ${index < stageIndex ? 'done' : ''}`}
+              >
+                <span className="stage-index">{index + 1}</span>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="error-banner row-between">
+            <span>{error}</span>
+            {lastRequest ? (
+              <button type="button" className="btn btn-ghost" onClick={retryLastRequest}>
+                Retry
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
         {renderContent()}
       </main>
 
-      {flow !== 'results' ? (
-        <footer className="footer">
-          Built for Nigerian graduates. Powered by DeepSeek V3.{' '}
-          <a href="https://github.com/Techcifa/cv-builder-nigeria" target="_blank" rel="noopener noreferrer">
-            Source code
-          </a>
-          .
-        </footer>
-      ) : null}
+      <footer className="footer">
+        Built for Nigerian graduates. Clear workflow. Premium outcomes.
+      </footer>
 
       {isSupabaseConfigured ? (
         <Suspense fallback={null}>

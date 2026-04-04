@@ -35,7 +35,7 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
   return (
     <div style={{ display: 'grid', gap: 24 }}>
       <section>
-        <div className="section-label">Step 1 - Paste current CV content</div>
+        <div className="section-label">Step 1 - Paste CV Content</div>
         <textarea
           className="input-like"
           placeholder="Paste your CV text here. Formatting is optional; content quality matters most."
@@ -45,13 +45,13 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
         />
         <div className={`status-row ${getStatusTone()}`}>
           {cvText.trim().length >= 100
-            ? 'Text length is sufficient for quality generation.'
+            ? 'Great. You have enough detail for quality output.'
             : `${cvText.trim().length}/100 minimum characters`}
         </div>
       </section>
 
       <section>
-        <div className="section-label">Step 2 - Select target industry</div>
+        <div className="section-label">Step 2 - Choose Target Industry</div>
         <div className="industry-grid">
           {INDUSTRIES.map((option) => (
             <button
@@ -69,12 +69,12 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
       </section>
 
       <section className="info-banner">
-        Recruiter guidance: outcomes matter more than duties. The generated CV rewrites bullets into clear
+        Recruiter tip: outcomes matter more than duties. The generated CV rewrites bullets into clear
         challenge-action-result statements where possible.
       </section>
 
       <button type="button" className="btn btn-primary" disabled={isDisabled} onClick={onSubmit}>
-        {loading ? 'Generating package...' : 'Generate AI Career Package'}
+        {loading ? 'Generating application suite...' : 'Generate Application Suite'}
       </button>
     </div>
   );
