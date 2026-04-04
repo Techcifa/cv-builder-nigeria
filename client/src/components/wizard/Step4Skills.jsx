@@ -12,11 +12,11 @@ const Step4Skills = ({ data, update }) => {
 
   return (
     <div className="step-content">
-      <h2 style={{ marginBottom: '24px' }}>Skills & Tools</h2>
+      <h2 className="mb-16">Skills & Tools</h2>
       <div className="form-group">
         <label className="form-label">Technical Skills & Software</label>
         <input 
-          className="form-input" 
+          className="input-like" 
           placeholder="e.g. Excel, Python, Bloomberg Terminal, SQL" 
           value={data.technical} 
           onChange={e => update('technical', e.target.value)} 
@@ -45,7 +45,7 @@ const Step4Skills = ({ data, update }) => {
       <div className="form-group">
         <label className="form-label">Languages & Proficiency</label>
         <input 
-          className="form-input" 
+          className="input-like" 
           placeholder="e.g. English (Fluent), Yoruba (Native)" 
           value={data.languages} 
           onChange={e => update('languages', e.target.value)} 

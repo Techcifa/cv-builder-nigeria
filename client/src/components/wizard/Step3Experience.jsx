@@ -13,7 +13,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
 
   return (
     <div className="step-content">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="row-between mb-16">
         <h2>Work Experience</h2>
         <button 
           type="button"
@@ -28,12 +28,12 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
       {hasExperience ? (
         <div>
           {experience.map((exp, i) => (
-            <div key={i} style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '20px' }}>
+            <div key={i} className="card mb-16">
               <div className="responsive-grid">
                 <div className="form-group">
                   <label className="form-label">Role Title</label>
                   <input 
-                    className="form-input" 
+                    className="input-like" 
                     placeholder="e.g. Intern" 
                     value={exp.role} 
                     onChange={e => updateExp(i, 'role', e.target.value)} 
@@ -42,7 +42,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
                 <div className="form-group">
                   <label className="form-label">Organization</label>
                   <input 
-                    className="form-input" 
+                    className="input-like" 
                     placeholder="e.g. KPMG Nigeria" 
                     value={exp.org} 
                     onChange={e => updateExp(i, 'org', e.target.value)} 
@@ -50,9 +50,18 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
                 </div>
               </div>
               <div className="form-group">
+                <label className="form-label">Duration</label>
+                <input
+                  className="input-like"
+                  placeholder="e.g. Jun 2023 - Aug 2023"
+                  value={exp.dates}
+                  onChange={e => updateExp(i, 'dates', e.target.value)}
+                />
+              </div>
+              <div className="form-group">
                 <label className="form-label">Key Highlights (1-2 sentences)</label>
                 <textarea 
-                  className="form-input" 
+                  className="input-like" 
                   style={{ minHeight: '80px' }} 
                   value={exp.bullets} 
                   onChange={e => updateExp(i, 'bullets', e.target.value)} 
@@ -63,7 +72,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
           <button type="button" className="btn btn-ghost" onClick={addExp}>+ Add Another Experience</button>
         </div>
       ) : (
-        <div style={{ background: 'rgba(52, 215, 255, 0.18)', padding: '24px', borderRadius: '12px', border: '1px solid rgba(52, 215, 255, 0.28)' }}>
+        <div className="info-banner">
           <p style={{ color: 'var(--accent)', fontWeight: '600' }}>No problem! Our AI specializes in highlighting academic projects and leadership for fresh graduates.</p>
         </div>
       )}
@@ -72,3 +81,4 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
 };
 
 export default Step3Experience;
+

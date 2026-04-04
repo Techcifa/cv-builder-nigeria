@@ -10,10 +10,10 @@ const AuthModal = lazy(() => import('./components/AuthModal'));
 
 const CREATE_STEPS = ['Home', 'Build', 'Results'];
 const NAV_ITEMS = [
-  { id: 'create', label: 'Create', short: 'Create', icon: 'C' },
-  { id: 'suites', label: 'My Suites', short: 'Suites', icon: 'S' },
-  { id: 'templates', label: 'Templates', short: 'Templates', icon: 'T' },
-  { id: 'settings', label: 'Settings', short: 'Settings', icon: 'G' },
+  { id: 'create', label: 'Create', short: 'Create', icon: '+' },
+  { id: 'suites', label: 'My Suites', short: 'Suites', icon: '≡' },
+  { id: 'templates', label: 'Templates', short: 'Tmplt', icon: '◻' },
+  { id: 'settings', label: 'Settings', short: 'Config', icon: '⚙' },
 ];
 const APP_STATE_KEY = 'gt_builder_app_state_v2';
 const LOADING_STAGES = [
@@ -595,7 +595,7 @@ const App = () => {
             onClick={() => setWorkspace(item.id)}
             aria-current={workspace === item.id ? 'page' : undefined}
           >
-            <span className="mobile-dock-icon" aria-hidden="true">{item.icon}</span>
+            <span className="dock-icon" aria-hidden="true">{item.icon}</span>
             <span>{item.short}</span>
           </button>
         ))}

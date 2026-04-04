@@ -10,7 +10,7 @@ const INDUSTRIES = [
 const Step6Target = ({ data, update }) => {
   return (
     <div className="step-content">
-      <h2 style={{ marginBottom: '24px' }}>Target Industry</h2>
+      <h2 className="mb-16">Target Industry</h2>
       <div className="industry-grid mt-16">
         {INDUSTRIES.map((industryOption) => (
           <button
@@ -27,7 +27,7 @@ const Step6Target = ({ data, update }) => {
       <div className="form-group mt-16">
         <label className="form-label">Dream Companies (Optional)</label>
         <input
-          className="form-input"
+          className="input-like"
           placeholder="e.g. GTBank, Shell, KPMG"
           value={data.companies}
           onChange={(event) => update('companies', event.target.value)}
@@ -36,7 +36,7 @@ const Step6Target = ({ data, update }) => {
       <div className="form-group">
         <label className="form-label">One-Sentence Career Goal (Optional)</label>
         <input
-          className="form-input"
+          className="input-like"
           placeholder="e.g. To become a frontier analyst in the Nigerian banking sector."
           value={data.goal}
           onChange={(event) => update('goal', event.target.value)}
