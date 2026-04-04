@@ -1,54 +1,45 @@
 import React from 'react';
 
 const INDUSTRIES = [
-  { id: 'banking', name: 'Banking', icon: '🏦' },
-  { id: 'fmcg', name: 'FMCG', icon: '🛒' },
-  { id: 'consulting', name: 'Consulting', icon: '📊' },
-  { id: 'oilandgas', name: 'Oil & Gas', icon: '⛽' },
+  { id: 'banking', name: 'Banking', tag: 'Finance' },
+  { id: 'fmcg', name: 'FMCG', tag: 'Consumer' },
+  { id: 'consulting', name: 'Consulting', tag: 'Advisory' },
+  { id: 'oilandgas', name: 'Oil & Gas', tag: 'Energy' },
 ];
 
 const Step6Target = ({ data, update }) => {
   return (
     <div className="step-content">
       <h2 style={{ marginBottom: '24px' }}>Target Industry</h2>
-      <div className="responsive-grid" style={{ marginBottom: '32px' }}>
-        {INDUSTRIES.map(ind => (
-          <button 
-            key={ind.id} 
-            className="chip-label" 
-            style={{ 
-              height: '80px', 
-              fontSize: '1.1rem',
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '12px',
-              background: data.industry === ind.id ? 'var(--accent-alpha)' : 'rgba(255,255,255,0.03)',
-              borderColor: data.industry === ind.id ? 'var(--accent)' : 'var(--border)',
-              color: data.industry === ind.id ? 'white' : 'var(--text-muted)'
-            }}
-            onClick={() => update('industry', ind.id)}
+      <div className="industry-grid mt-16">
+        {INDUSTRIES.map((industryOption) => (
+          <button
+            key={industryOption.id}
+            type="button"
+            className={`industry-card ${data.industry === industryOption.id ? 'active' : ''}`}
+            onClick={() => update('industry', industryOption.id)}
           >
-            <span>{ind.icon}</span> {ind.name}
+            <strong>{industryOption.name}</strong>
+            <div className="industry-meta">{industryOption.tag}</div>
           </button>
         ))}
       </div>
-      <div className="form-group">
+      <div className="form-group mt-16">
         <label className="form-label">Dream Companies (Optional)</label>
-        <input 
-          className="form-input" 
-          placeholder="e.g. GTBank, Shell, KPMG" 
-          value={data.companies} 
-          onChange={e => update('companies', e.target.value)} 
+        <input
+          className="form-input"
+          placeholder="e.g. GTBank, Shell, KPMG"
+          value={data.companies}
+          onChange={(event) => update('companies', event.target.value)}
         />
       </div>
       <div className="form-group">
         <label className="form-label">One-Sentence Career Goal (Optional)</label>
-        <input 
-          className="form-input" 
-          placeholder="e.g. To become a frontier analyst in the Nigerian banking sector." 
-          value={data.goal} 
-          onChange={e => update('goal', e.target.value)} 
+        <input
+          className="form-input"
+          placeholder="e.g. To become a frontier analyst in the Nigerian banking sector."
+          value={data.goal}
+          onChange={(event) => update('goal', event.target.value)}
         />
       </div>
     </div>

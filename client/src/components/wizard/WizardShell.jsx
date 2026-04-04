@@ -58,7 +58,7 @@ const WizardShell = ({ onComplete, onCancel }) => {
         Step <span>{step}</span> of 6 - <span>{STEP_META[step - 1].label}</span>
       </div>
 
-      <div style={{ minHeight: 360 }}>
+      <div className="wizard-content">
         {step === 1 && <Step1Personal data={formData.personal} update={(field, value) => updateSection('personal', field, value)} />}
         {step === 2 && <Step2Education data={formData.education} update={(field, value) => updateSection('education', field, value)} />}
         {step === 3 && (
@@ -74,7 +74,7 @@ const WizardShell = ({ onComplete, onCancel }) => {
         {step === 6 && <Step6Target data={formData.target} update={(field, value) => updateSection('target', field, value)} />}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+      <div className="wizard-actions">
         <button type="button" className="btn btn-ghost" onClick={step === 1 ? onCancel : prevStep}>
           {step === 1 ? 'Cancel' : 'Back'}
         </button>

@@ -16,6 +16,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h2>Work Experience</h2>
         <button 
+          type="button"
           className="chip-label" 
           style={{ background: hasExperience ? 'transparent' : 'var(--red-alpha)' }} 
           onClick={() => setHasExperience(!hasExperience)}
@@ -59,7 +60,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
               </div>
             </div>
           ))}
-          <button style={{ color: 'var(--accent-light)', fontWeight: '700' }} onClick={addExp}>+ Add Another Experience</button>
+          <button type="button" className="btn btn-ghost" onClick={addExp}>+ Add Another Experience</button>
         </div>
       ) : (
         <div style={{ background: 'var(--accent-alpha)', padding: '24px', borderRadius: '12px', border: '1px solid var(--accent-glow)' }}>

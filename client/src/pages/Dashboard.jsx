@@ -70,7 +70,10 @@ const Dashboard = ({ user, onViewCV, onBack }) => {
               tabIndex={0}
               onClick={() => onViewCV(cv.data)}
               onKeyDown={(event) => {
-                if (event.key === 'Enter') onViewCV(cv.data);
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onViewCV(cv.data);
+                }
               }}
             >
               <div className="row-between">

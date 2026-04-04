@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const LinkedInTab = ({ content }) => {
+const LinkedInTab = ({ content, onCopy }) => {
   const [copied, setCopied] = useState('');
 
   const isStructured = typeof content === 'object' && content !== null && content.headline;
@@ -8,10 +8,11 @@ const LinkedInTab = ({ content }) => {
   const about = isStructured ? content.about : content;
   const skills = isStructured ? content.skills : [];
 
-  const handleCopy = (text, type) => {
-    navigator.clipboard.writeText(text || '');
-    setCopied(type);
-    setTimeout(() => setCopied(''), 1800);
+  const handleCopy = async (text, type) => {
+    await onCopy(text || '', () => {
+      setCopied(type);
+      setTimeout(() => setCopied(''), 1800);
+    });
   };
 
   return (

@@ -65,18 +65,21 @@ const Step2Education = ({ data, update }) => {
       <div className="form-group">
         <label className="form-label">Relevant Coursework</label>
         <div className="chip-grid">
-          {COURSES.map(c => (
-            <div key={c}>
+          {COURSES.map((course, index) => {
+            const courseId = `course-${index}`;
+            return (
+            <div key={course}>
               <input 
-                id={c} 
+                id={courseId}
                 type="checkbox" 
                 className="chip-checkbox" 
-                checked={data.courses.includes(c)} 
-                onChange={() => toggleCourse(c)} 
+                checked={data.courses.includes(course)}
+                onChange={() => toggleCourse(course)}
               />
-              <label htmlFor={c} className="chip-label">{c}</label>
+              <label htmlFor={courseId} className="chip-label">{course}</label>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
     </div>

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 
-const CoverLetterTab = ({ content, industry }) => {
+const CoverLetterTab = ({ content, industry, onCopy }) => {
   const [copied, setCopied] = useState(false);
 
   const displayIndustry = industry ? industry.toUpperCase() : 'GT';
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(content || '');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+  const handleCopy = async () => {
+    await onCopy(content || '', () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
   };
 
   return (

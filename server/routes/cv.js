@@ -15,31 +15,56 @@ const PROMPT_MAP = {
 };
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const REQUEST_TIMEOUT_MS = 45000;
+
+async function safeJson(response) {
+  try {
+    return await response.json();
+  } catch (_error) {
+    return null;
+  }
+}
 
 async function callDeepSeek(prompt, isRetry = false) {
-  const response = await fetch('https://api.deepseek.com/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model:           'deepseek-chat',
-      messages: [
-        {
-          role:    'system',
-          content: 'You are an expert Nigerian recruitment consultant. Always respond with valid JSON only. No markdown fences. No preamble. No explanation outside the JSON object.',
-        },
-        {
-          role:    'user',
-          content: prompt,
-        },
-      ],
-      temperature:     0.7,
-      max_tokens:      8192,
-      response_format: { type: 'json_object' },
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let response;
+
+  try {
+    response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model:           'deepseek-chat',
+        messages: [
+          {
+            role:    'system',
+            content: 'You are an expert Nigerian recruitment consultant. Always respond with valid JSON only. No markdown fences. No preamble. No explanation outside the JSON object.',
+          },
+          {
+            role:    'user',
+            content: prompt,
+          },
+        ],
+        temperature:     0.7,
+        max_tokens:      8192,
+        response_format: { type: 'json_object' },
+      }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      const timeoutError = new Error('DeepSeek request timed out.');
+      timeoutError.status = 504;
+      throw timeoutError;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (response.status === 429) {
     if (isRetry) {
@@ -53,14 +78,20 @@ async function callDeepSeek(prompt, isRetry = false) {
   }
 
   if (!response.ok) {
-    const err     = await response.json();
-    const message = err.error?.message || 'DeepSeek request failed';
+    const err = await safeJson(response);
+    const message = err?.error?.message || 'DeepSeek request failed';
     const error   = new Error(message);
     error.status  = response.status;
     throw error;
   }
 
-  const data = await response.json();
+  const data = await safeJson(response);
+  if (!data?.choices?.[0]?.message?.content) {
+    const malformedError = new Error('DeepSeek returned an unexpected response payload.');
+    malformedError.status = 502;
+    throw malformedError;
+  }
+
   return data.choices[0].message.content;
 }
 
@@ -111,6 +142,9 @@ router.post('/generate', async (req, res) => {
     console.error('DeepSeek API error:', err);
     if (err.status === 429) {
       return res.status(429).json({ error: 'API quota exceeded. Please wait a moment and try again.' });
+    }
+    if (err.status === 504) {
+      return res.status(504).json({ error: 'AI service timed out. Please try again.' });
     }
     return res.status(500).json({ error: 'Failed to contact AI service. Please try again.' });
   }

@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useState } from 'react';
 import CVInput from './components/CVInput';
 import WizardShell from './components/wizard/WizardShell';
 import FlowSelector from './components/FlowSelector';
-import { supabase } from './lib/supabase';
+import { isSupabaseConfigured, supabase } from './lib/supabase';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const ResultTabs = lazy(() => import('./components/ResultTabs'));
@@ -20,6 +20,8 @@ const App = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   React.useEffect(() => {
+    if (!isSupabaseConfigured) return undefined;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
@@ -49,7 +51,7 @@ const App = () => {
 
       const mergedData = { ...data, industry: targetIndustry };
 
-      if (user) {
+      if (user && isSupabaseConfigured) {
         supabase
           .from('cv_results')
           .insert([{ user_id: user.id, data: mergedData }])
@@ -197,11 +199,11 @@ const App = () => {
               <button type="button" className="btn btn-ghost" onClick={() => setFlow('dashboard')}>
                 My Packages
               </button>
-            ) : (
+            ) : isSupabaseConfigured ? (
               <button type="button" className="btn btn-ghost" onClick={() => setIsAuthOpen(true)}>
                 Log In
               </button>
-            )}
+            ) : null}
 
             {flow !== 'marketing' && flow !== 'landing' && (
               <button type="button" className="btn" onClick={() => setFlow('landing')}>
@@ -227,9 +229,11 @@ const App = () => {
         </footer>
       ) : null}
 
-      <Suspense fallback={null}>
-        <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
-      </Suspense>
+      {isSupabaseConfigured ? (
+        <Suspense fallback={null}>
+          <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+        </Suspense>
+      ) : null}
     </div>
   );
 };

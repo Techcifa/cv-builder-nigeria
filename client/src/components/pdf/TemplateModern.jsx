@@ -35,7 +35,15 @@ const TemplateModern = ({ cvText }) => {
         {/* Name in Sidebar for "Modern" approach */}
         <div>
           <h1 style={{ fontSize: '24pt', fontWeight: '900', color: '#0f172a', lineHeight: '1.1', textTransform: 'uppercase', marginBottom: '12px' }}>{name}</h1>
-          <div style={{ fontSize: '9pt', color: '#64748b', lineHeight: '1.6' }} dangerouslySetInnerHTML={{ __html: contact.replace(/\|/g, '<br/>') }} />
+          <div style={{ fontSize: '9pt', color: '#64748b', lineHeight: '1.6' }}>
+            {contact
+              .split('|')
+              .map((part) => part.trim())
+              .filter(Boolean)
+              .map((part, index) => (
+                <div key={`${part}-${index}`}>{part}</div>
+              ))}
+          </div>
         </div>
 
         {sidebarData.map((sec, i) => (

@@ -25,18 +25,21 @@ const Step4Skills = ({ data, update }) => {
       <div className="form-group">
         <label className="form-label">Soft Skills</label>
         <div className="chip-grid">
-          {SOFT_SKILLS.map(s => (
-            <div key={s}>
+          {SOFT_SKILLS.map((skill, index) => {
+            const skillId = `soft-skill-${index}`;
+            return (
+            <div key={skill}>
               <input 
-                id={s} 
+                id={skillId}
                 type="checkbox" 
                 className="chip-checkbox" 
-                checked={data.soft.includes(s)} 
-                onChange={() => toggleSoft(s)} 
+                checked={data.soft.includes(skill)}
+                onChange={() => toggleSoft(skill)}
               />
-              <label htmlFor={s} className="chip-label">{s}</label>
+              <label htmlFor={skillId} className="chip-label">{skill}</label>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
       <div className="form-group">

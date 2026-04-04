@@ -19,17 +19,23 @@ const ResultTabs = ({ data, onReset }) => {
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState('modern');
+  const [actionError, setActionError] = useState('');
 
-  const { rewritten_cv, gap_analysis, certifications, cover_letter, linkedin_bio, industry } = data;
+  const rewrittenCV = typeof data?.rewritten_cv === 'string' ? data.rewritten_cv : '';
+  const gapAnalysis = Array.isArray(data?.gap_analysis) ? data.gap_analysis : [];
+  const certifications = Array.isArray(data?.certifications) ? data.certifications : [];
+  const coverLetter = data?.cover_letter ?? '';
+  const linkedInBio = data?.linkedin_bio ?? '';
+  const industry = data?.industry ?? '';
 
-  const criticalCount = useMemo(() => gap_analysis.filter((item) => item.severity === 'critical').length, [gap_analysis]);
-  const importantCount = useMemo(() => gap_analysis.filter((item) => item.severity === 'important').length, [gap_analysis]);
-  const niceCount = useMemo(() => gap_analysis.filter((item) => item.severity === 'nice-to-have').length, [gap_analysis]);
+  const criticalCount = useMemo(() => gapAnalysis.filter((item) => item.severity === 'critical').length, [gapAnalysis]);
+  const importantCount = useMemo(() => gapAnalysis.filter((item) => item.severity === 'important').length, [gapAnalysis]);
+  const niceCount = useMemo(() => gapAnalysis.filter((item) => item.severity === 'nice-to-have').length, [gapAnalysis]);
 
   const sortedGaps = useMemo(() => {
     const order = { critical: 0, important: 1, 'nice-to-have': 2 };
-    return [...gap_analysis].sort((a, b) => order[a.severity] - order[b.severity]);
-  }, [gap_analysis]);
+    return [...gapAnalysis].sort((a, b) => (order[a.severity] ?? 99) - (order[b.severity] ?? 99));
+  }, [gapAnalysis]);
 
   const handleTabKeyDown = (event, currentIndex) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
@@ -38,20 +44,38 @@ const ResultTabs = ({ data, onReset }) => {
       event.key === 'ArrowRight'
         ? (currentIndex + 1) % TAB_CONFIG.length
         : (currentIndex - 1 + TAB_CONFIG.length) % TAB_CONFIG.length;
-    setActiveTab(TAB_CONFIG[nextIndex].id);
+    const nextTabId = TAB_CONFIG[nextIndex].id;
+    setActiveTab(nextTabId);
+    document.getElementById(`tab-${nextTabId}`)?.focus();
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(rewritten_cv || '');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
+  const copyText = async (text, onSuccess) => {
+    try {
+      if (!navigator?.clipboard?.writeText) {
+        throw new Error('Clipboard API unavailable');
+      }
+      await navigator.clipboard.writeText(text || '');
+      setActionError('');
+      onSuccess?.();
+    } catch (_error) {
+      setActionError('Copy failed in this browser context. Select and copy the text manually.');
+    }
+  };
+
+  const handleCopy = async () => {
+    await copyText(rewrittenCV, () => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
   };
 
   const handleDownloadPDF = async () => {
+    setActionError('');
     setPdfLoading(true);
     try {
       const html2pdf = (await import('html2pdf.js')).default;
       const element = document.getElementById('cv-pdf-template');
+      if (!element) throw new Error('PDF template not found');
       const opt = {
         margin: [12, 12, 12, 12],
         filename: `GT_CV_${(industry || 'EXPERT').toUpperCase()}.pdf`,
@@ -62,6 +86,7 @@ const ResultTabs = ({ data, onReset }) => {
       await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error('PDF generation failed:', error);
+      setActionError('PDF generation failed. Please try again.');
     } finally {
       setPdfLoading(false);
     }
@@ -88,11 +113,13 @@ const ResultTabs = ({ data, onReset }) => {
         ))}
       </div>
 
+      {actionError ? <div className="error-banner">{actionError}</div> : null}
+
       <section className="result-panel" role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
         {activeTab === 'cv' ? (
           <div className="stack-16">
             <TemplatePicker activeTemplate={activeTemplate} onSelect={setActiveTemplate} />
-            <pre className="result-code">{rewritten_cv}</pre>
+            <pre className="result-code">{rewrittenCV || 'CV rewrite not available.'}</pre>
             <div className="result-actions">
               <button type="button" className="btn" onClick={handleCopy}>
                 {copied ? 'Copied' : 'Copy CV Text'}
@@ -136,6 +163,7 @@ const ResultTabs = ({ data, onReset }) => {
               <h3 className="section-title">Certification Roadmap</h3>
               <p className="muted">Recommendations to improve {industry || 'your'} hiring readiness.</p>
             </header>
+            {certifications.length === 0 ? <p className="muted">No certifications available.</p> : null}
             {certifications.map((cert, index) => (
               <article key={`${cert.name}-${index}`} className="cert-card">
                 <div className="row-between align-start gap-10">
@@ -158,8 +186,8 @@ const ResultTabs = ({ data, onReset }) => {
           </div>
         ) : null}
 
-        {activeTab === 'cover' ? <CoverLetterTab content={cover_letter} industry={industry} /> : null}
-        {activeTab === 'linkedin' ? <LinkedInTab content={linkedin_bio} /> : null}
+        {activeTab === 'cover' ? <CoverLetterTab content={coverLetter} industry={industry} onCopy={copyText} /> : null}
+        {activeTab === 'linkedin' ? <LinkedInTab content={linkedInBio} onCopy={copyText} /> : null}
       </section>
 
       <button type="button" className="btn btn-ghost center-self" onClick={onReset}>
@@ -168,9 +196,9 @@ const ResultTabs = ({ data, onReset }) => {
 
       <div className="pdf-offscreen">
         <div id="cv-pdf-template" className="pdf-width">
-          {activeTemplate === 'modern' ? <TemplateModern cvText={rewritten_cv} /> : null}
-          {activeTemplate === 'classic' ? <TemplateClassic cvText={rewritten_cv} /> : null}
-          {activeTemplate === 'executive' ? <TemplateExecutive cvText={rewritten_cv} /> : null}
+          {activeTemplate === 'modern' ? <TemplateModern cvText={rewrittenCV} /> : null}
+          {activeTemplate === 'classic' ? <TemplateClassic cvText={rewrittenCV} /> : null}
+          {activeTemplate === 'executive' ? <TemplateExecutive cvText={rewrittenCV} /> : null}
         </div>
       </div>
     </div>
