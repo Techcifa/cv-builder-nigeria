@@ -30,6 +30,7 @@ const createFallbackClient = () => {
     auth: {
       getSession: async () => ({ data: { session: null } }),
       onAuthStateChange: () => noopSubscription,
+      signOut: async () => ({ error: null }),
       signInWithPassword: async () => ({
         error: new Error('Supabase is not configured. Login is disabled.'),
       }),

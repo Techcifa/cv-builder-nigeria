@@ -8,18 +8,31 @@ import TemplateExecutive from './pdf/TemplateExecutive';
 
 const TAB_CONFIG = [
   { id: 'cv', label: 'CV' },
-  { id: 'gaps', label: 'Gaps' },
-  { id: 'certs', label: 'Certifications' },
-  { id: 'cover', label: 'Cover' },
-  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'gaps', label: 'Diagnostics' },
+  { id: 'certs', label: 'Upskilling' },
+  { id: 'cover', label: 'Cover Letter' },
+  { id: 'linkedin', label: 'LinkedIn Profile' },
 ];
 
-const ResultTabs = ({ data, onReset }) => {
-  const [activeTab, setActiveTab] = useState('cv');
+const ResultTabs = ({ data, onReset, onRegenerate }) => {
+  const readStoredResultState = () => {
+    try {
+      const raw = window.localStorage.getItem('gt_builder_results_state_v1');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const storedResultState = readStoredResultState();
+
+  const [activeTab, setActiveTab] = useState(storedResultState?.activeTab || 'cv');
   const [copied, setCopied] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [activeTemplate, setActiveTemplate] = useState('modern');
+  const [activeTemplate, setActiveTemplate] = useState(storedResultState?.activeTemplate || 'modern');
   const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
 
   const rewrittenCV = typeof data?.rewritten_cv === 'string' ? data.rewritten_cv : '';
   const gapAnalysis = Array.isArray(data?.gap_analysis) ? data.gap_analysis : [];
@@ -36,6 +49,11 @@ const ResultTabs = ({ data, onReset }) => {
     const order = { critical: 0, important: 1, 'nice-to-have': 2 };
     return [...gapAnalysis].sort((a, b) => (order[a.severity] ?? 99) - (order[b.severity] ?? 99));
   }, [gapAnalysis]);
+
+  React.useEffect(() => {
+    const stateForStorage = { activeTab, activeTemplate };
+    window.localStorage.setItem('gt_builder_results_state_v1', JSON.stringify(stateForStorage));
+  }, [activeTab, activeTemplate]);
 
   const handleTabKeyDown = (event, currentIndex) => {
     if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
@@ -58,7 +76,7 @@ const ResultTabs = ({ data, onReset }) => {
       setActionError('');
       onSuccess?.();
     } catch (_error) {
-      setActionError('Copy failed in this browser context. Select and copy the text manually.');
+      setActionError('Copy unavailable in this context. Copy manually from the editor.');
     }
   };
 
@@ -66,6 +84,8 @@ const ResultTabs = ({ data, onReset }) => {
     await copyText(rewrittenCV, () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
+      setActionSuccess('Copied: CV text.');
+      setTimeout(() => setActionSuccess(''), 2200);
     });
   };
 
@@ -84,9 +104,11 @@ const ResultTabs = ({ data, onReset }) => {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
       await html2pdf().set(opt).from(element).save();
+      setActionSuccess('Export complete: PDF ready.');
+      setTimeout(() => setActionSuccess(''), 2200);
     } catch (error) {
       console.error('PDF generation failed:', error);
-      setActionError('PDF generation failed. Please try again.');
+      setActionError('Export failed. Retry PDF generation.');
     } finally {
       setPdfLoading(false);
     }
@@ -94,6 +116,18 @@ const ResultTabs = ({ data, onReset }) => {
 
   return (
     <div className="result-shell">
+      <div className="result-dock">
+        <button type="button" className="btn btn-primary" onClick={onRegenerate} disabled={!onRegenerate}>
+          Regenerate CV
+        </button>
+        <button type="button" className="btn" onClick={() => setActiveTab('gaps')}>
+          Fix Key Issues
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={() => setActiveTab('cv')}>
+          Return to CV
+        </button>
+      </div>
+
       <div className="result-tabs" role="tablist" aria-label="Result sections">
         {TAB_CONFIG.map((tab, index) => (
           // roving behavior for left/right keys
@@ -114,18 +148,22 @@ const ResultTabs = ({ data, onReset }) => {
       </div>
 
       {actionError ? <div className="error-banner">{actionError}</div> : null}
+      {actionSuccess ? <div className="success-banner">{actionSuccess}</div> : null}
 
       <section className="result-panel" role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
         {activeTab === 'cv' ? (
           <div className="stack-16">
             <TemplatePicker activeTemplate={activeTemplate} onSelect={setActiveTemplate} />
-            <pre className="result-code">{rewrittenCV || 'CV rewrite not available.'}</pre>
+            <pre className="result-code">{rewrittenCV || 'Generated CV is unavailable for this record.'}</pre>
             <div className="result-actions">
               <button type="button" className="btn" onClick={handleCopy}>
-                {copied ? 'Copied' : 'Copy CV'}
+                {copied ? 'Copied' : 'Copy Resume'}
+              </button>
+              <button type="button" className="btn btn-ghost" onClick={() => setActiveTab('gaps')}>
+                Fix Key Issues
               </button>
               <button type="button" className="btn btn-primary" onClick={handleDownloadPDF} disabled={pdfLoading}>
-                {pdfLoading ? 'Generating PDF...' : 'Download PDF'}
+                {pdfLoading ? 'Exporting PDF...' : 'Export PDF'}
               </button>
             </div>
           </div>
@@ -134,9 +172,9 @@ const ResultTabs = ({ data, onReset }) => {
         {activeTab === 'gaps' ? (
           <div className="stack-14">
             <div className="result-summary">
-              <span>{criticalCount} Critical</span>
-              <span>{importantCount} Important</span>
-              <span>{niceCount} Nice-to-have</span>
+              <span>{criticalCount} Critical Gaps</span>
+              <span>{importantCount} Priority Gaps</span>
+              <span>{niceCount} Optional Gaps</span>
             </div>
             {sortedGaps.map((gap, index) => (
               <article key={`${gap.gap}-${index}`} className={`gap-card ${gap.severity}`}>
@@ -150,7 +188,7 @@ const ResultTabs = ({ data, onReset }) => {
                 <h3>{gap.gap}</h3>
                 <p className="muted">{gap.detail}</p>
                 <div className="gap-fix">
-                  <strong>Action:</strong> {gap.fix}
+                  <strong>Recommended Action:</strong> {gap.fix}
                 </div>
               </article>
             ))}
@@ -160,10 +198,10 @@ const ResultTabs = ({ data, onReset }) => {
         {activeTab === 'certs' ? (
           <div className="stack-12">
             <header className="stack-6">
-              <h3 className="section-title">Certification Roadmap</h3>
-              <p className="muted">Recommendations to improve {industry || 'your'} hiring readiness.</p>
+              <h3 className="section-title">Strategic Upskilling Roadmap</h3>
+              <p className="muted">Prioritized credentials to improve graduate hiring readiness.</p>
             </header>
-            {certifications.length === 0 ? <p className="muted">No certifications available.</p> : null}
+            {certifications.length === 0 ? <p className="muted">No upskilling recommendations available.</p> : null}
             {certifications.map((cert, index) => (
               <article key={`${cert.name}-${index}`} className="cert-card">
                 <div className="row-between align-start gap-10">
@@ -179,7 +217,7 @@ const ResultTabs = ({ data, onReset }) => {
                 </div>
                 <p className="muted">{cert.relevance}</p>
                 <a href={cert.link} target="_blank" rel="noopener noreferrer" className="cert-link">
-                  Visit course
+                  View Program
                 </a>
               </article>
             ))}
@@ -191,7 +229,7 @@ const ResultTabs = ({ data, onReset }) => {
       </section>
 
       <button type="button" className="btn btn-ghost center-self" onClick={onReset}>
-        Create Another Package
+        Deploy New Suite
       </button>
 
       <div className="pdf-offscreen">

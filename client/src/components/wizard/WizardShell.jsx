@@ -15,9 +15,28 @@ const STEP_META = [
   { label: 'Target Role' },
 ];
 
-const WizardShell = ({ onComplete, onCancel }) => {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+const STEP_INSIGHTS = [
+  'Intelligence Brief: Recruiters prioritize candidates with verifiable contact channels and active professional footprints.',
+  'Intelligence Brief: Role-aligned coursework improves ATS match quality.',
+  'Intelligence Brief: Quantified outcomes outperform task-only bullets.',
+  'Intelligence Brief: Include technical tools screening systems are built to detect.',
+  'Intelligence Brief: Projects can offset limited formal experience when execution is clear.',
+  'Intelligence Brief: One target industry improves calibration quality.',
+];
+const WIZARD_DRAFT_KEY = 'gt_builder_wizard_draft_v1';
+
+const WizardShell = ({ onComplete, onCancel, qualityHint }) => {
+  const readStoredDraft = () => {
+    try {
+      const raw = window.localStorage.getItem(WIZARD_DRAFT_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_error) {
+      return null;
+    }
+  };
+
+  const defaultData = {
     personal: { name: '', email: '', phone: '', city: '', linkedin: '' },
     education: { degree: '', institution: '', year: '', grade: '', courses: [], achievements: '' },
     hasExperience: true,
@@ -25,7 +44,11 @@ const WizardShell = ({ onComplete, onCancel }) => {
     skills: { technical: '', soft: [], languages: '' },
     projects: { finalProject: '', leadership: '', certs: '' },
     target: { industry: '', companies: '', goal: '' },
-  });
+  };
+  const storedDraft = readStoredDraft();
+
+  const [step, setStep] = useState(storedDraft?.step || 1);
+  const [formData, setFormData] = useState(storedDraft?.formData || defaultData);
 
   const updateSection = (section, field, value) => {
     setFormData((prev) => ({
@@ -46,8 +69,14 @@ const WizardShell = ({ onComplete, onCancel }) => {
   };
 
   const handleFinish = () => {
+    window.localStorage.removeItem(WIZARD_DRAFT_KEY);
     onComplete(formData, formData.target.industry);
   };
+
+  React.useEffect(() => {
+    const draft = { step, formData };
+    window.localStorage.setItem(WIZARD_DRAFT_KEY, JSON.stringify(draft));
+  }, [step, formData]);
 
   return (
     <div>
@@ -55,8 +84,10 @@ const WizardShell = ({ onComplete, onCancel }) => {
         <div className="wizard-progress-bar" style={{ width: `${progress}%` }} />
       </div>
       <div className="wizard-step-label">
-        Step <span>{step}</span> of 6 - <span>{STEP_META[step - 1].label}</span>
+        Step <span>{step}</span> of 6: <span>{STEP_META[step - 1].label}</span>
       </div>
+      <div className="insight-line">{STEP_INSIGHTS[step - 1]}</div>
+      {qualityHint ? <div className="insight-line mt-8">{qualityHint}</div> : null}
 
       <div className="wizard-content">
         {step === 1 && <Step1Personal data={formData.personal} update={(field, value) => updateSection('personal', field, value)} />}
@@ -76,7 +107,7 @@ const WizardShell = ({ onComplete, onCancel }) => {
 
       <div className="wizard-actions">
         <button type="button" className="btn btn-ghost" onClick={step === 1 ? onCancel : prevStep}>
-          {step === 1 ? 'Cancel' : 'Back'}
+          {step === 1 ? 'Exit Builder' : 'Back'}
         </button>
         <button
           type="button"
@@ -84,7 +115,7 @@ const WizardShell = ({ onComplete, onCancel }) => {
           disabled={!canGoNext()}
           onClick={step === 6 ? handleFinish : nextStep}
         >
-          {step === 6 ? 'Generate Application Suite' : 'Continue'}
+          {step === 6 ? 'Finalize Resume' : 'Continue'}
         </button>
       </div>
     </div>

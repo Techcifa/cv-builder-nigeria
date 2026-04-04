@@ -23,7 +23,7 @@ const INDUSTRIES = [
   },
 ];
 
-const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }) => {
+const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading, qualityHint }) => {
   const isDisabled = cvText.trim().length < 100 || !industry || loading;
 
   const getStatusTone = () => {
@@ -35,23 +35,28 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
   return (
     <div style={{ display: 'grid', gap: 24 }}>
       <section>
-        <div className="section-label">Step 1 - Paste CV Content</div>
+        <div className="section-label">Step 1: Paste CV Content</div>
         <textarea
           className="input-like"
-          placeholder="Paste your CV text here. Formatting is optional; content quality matters most."
+          placeholder="Paste your current CV content. Formatting is optional; measurable outcomes are prioritized."
           value={cvText}
           onChange={(event) => setCvText(event.target.value)}
           disabled={loading}
         />
         <div className={`status-row ${getStatusTone()}`}>
           {cvText.trim().length >= 100
-            ? 'Great. You have enough detail for quality output.'
-            : `${cvText.trim().length}/100 minimum characters`}
+            ? 'Input quality is sufficient for generation.'
+            : `Input length: ${cvText.trim().length}/100 minimum`}
+        </div>
+        <div className="insight-line">
+          {cvText.trim().length < 120
+            ? 'Intelligence Brief: stronger action verbs increase perceived impact.'
+            : 'Intelligence Brief: quantified outcomes improve shortlist probability.'}
         </div>
       </section>
 
       <section>
-        <div className="section-label">Step 2 - Choose Target Industry</div>
+        <div className="section-label">Step 2: Select Target Industry</div>
         <div className="industry-grid">
           {INDUSTRIES.map((option) => (
             <button
@@ -69,12 +74,13 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading }
       </section>
 
       <section className="info-banner">
-        Recruiter tip: outcomes matter more than duties. The generated CV rewrites bullets into clear
-        challenge-action-result statements where possible.
+        Intelligence Brief: outcome-led bullets outperform responsibility lists in screening stages.
       </section>
 
+      {qualityHint ? <div className="insight-line">{qualityHint}</div> : null}
+
       <button type="button" className="btn btn-primary" disabled={isDisabled} onClick={onSubmit}>
-        {loading ? 'Generating application suite...' : 'Generate Application Suite'}
+        {loading ? 'Generating CV...' : 'Generate CV'}
       </button>
     </div>
   );

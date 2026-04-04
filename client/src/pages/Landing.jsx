@@ -2,35 +2,35 @@ import React from 'react';
 
 const PRINCIPLES = [
   {
-    title: 'Single-path clarity',
-    text: 'Each section answers one question: what this does, how fast it works, and what action to take next.',
+    title: 'Precision Engineering',
+    text: 'Every facet of your CV is scientifically optimized for modern ATS parsers and elite hiring managers.',
   },
   {
-    title: 'Proof over hype',
-    text: 'Short evidence blocks and concrete outputs reduce hesitation before users share their CV.',
+    title: 'Data-Backed Narratives',
+    text: 'Translate your background into undeniable, quantified impact.',
   },
   {
-    title: 'Calm technical polish',
-    text: 'Dark neutral surfaces, restrained glow, and balanced spacing create focus without visual noise.',
+    title: 'Strategic Insight',
+    text: 'Uncover hidden weaknesses before recruiters do, then close them with clear action steps.',
   },
 ];
 
 const OUTPUTS = [
   {
-    title: 'CV Rewrite',
-    detail: 'Achievement-led bullets aligned to ATS parsing and graduate hiring language.',
+    title: 'ATS-Optimized Resume',
+    detail: 'Achievement-driven bullets calibrated for graduate recruitment.',
   },
   {
-    title: 'Gap Analysis',
-    detail: 'Critical, important, and optional gaps with practical improvement actions.',
+    title: 'Diagnostic Gap Analysis',
+    detail: 'Identify critical skill deficiencies and precise remediation steps.',
   },
   {
-    title: 'Certification Roadmap',
-    detail: 'Provider, cost, and duration recommendations matched to your chosen track.',
+    title: 'Strategic Upskilling Roadmap',
+    detail: 'Curated certification pathways mapped to your target industry.',
   },
   {
-    title: 'Cover Letter + LinkedIn',
-    detail: 'Application letter and profile copy tuned for Nigerian graduate programs.',
+    title: 'Persuasive Outreach Copy',
+    detail: 'Tailored cover letters and LinkedIn narratives designed to capture executive attention.',
   },
 ];
 
@@ -45,24 +45,24 @@ const Landing = ({ onStart }) => {
             <span className="badge">Nigeria Edition</span>
           </button>
           <button type="button" className="btn btn-primary" onClick={onStart}>
-            Start Building
+            Begin Precision Build
           </button>
         </div>
       </header>
 
       <main className="main-area">
         <section className="hero-stack">
-          <span className="kicker">AI Career Suite</span>
-          <h1 className="hero-title">Build stronger graduate applications in one focused workflow.</h1>
+          <span className="kicker">The Intelligent Graduate Career Suite</span>
+          <h1 className="hero-title">Elevate your graduate trajectory with precision-crafted applications</h1>
           <p className="hero-copy">
-            GT Builder transforms your existing draft or profile data into a complete job-application package for competitive Nigerian graduate trainee roles.
+            Turn your potential into a high-performance application suite for Nigeria&apos;s most competitive trainee programs.
           </p>
           <div className="hero-cta-row">
             <button type="button" className="btn btn-primary" onClick={onStart}>
-              Build My Package
+              Engineer My Application
             </button>
             <button type="button" className="btn btn-ghost" onClick={onStart}>
-              View Product Flow
+              See How It Works
             </button>
           </div>
 
@@ -88,9 +88,9 @@ const Landing = ({ onStart }) => {
 
         <section className="marketing-section">
           <div className="section-head">
-            <h2>Design approach behind the experience</h2>
+            <h2>Why this gives you a hiring edge</h2>
             <p>
-              The product is built to feel direct, trustworthy, and data-aware. Instead of decorative complexity, it emphasizes clear copy, structured hierarchy, and deliberate calls to action.
+              Built as a precision career engine: every screen is designed to improve screening performance, recruiter clarity, and interview conversion.
             </p>
           </div>
           <div className="card-grid three">
@@ -106,8 +106,8 @@ const Landing = ({ onStart }) => {
 
         <section className="marketing-section panel panel-pad">
           <div className="section-head">
-            <h2>What users receive after each generation</h2>
-            <p>Everything is designed to move a graduate from raw profile data to application-ready outputs with minimal back-and-forth.</p>
+            <h2>Your Complete Application Arsenal</h2>
+            <p>Everything you need to compete in elite trainee pipelines, generated in one run.</p>
           </div>
           <div className="card-grid">
             {OUTPUTS.map((item) => (
@@ -121,28 +121,28 @@ const Landing = ({ onStart }) => {
 
         <section className="marketing-section split">
           <article className="feature-card">
-            <span className="feature-index">Emotional tone</span>
-            <h3>Calm confidence with technical credibility</h3>
+            <span className="feature-index">Outcome focus</span>
+            <h3>Designed for measurable screening performance</h3>
             <p>
-              The interface communicates momentum without pressure. It feels modern and premium while staying transparent about what happens to user input and how outputs are structured.
+              Every generated section is structured to improve recruiter readability, ATS match confidence, and shortlisting momentum.
             </p>
           </article>
 
           <article className="feature-card">
-            <span className="feature-index">Primary action</span>
-            <h3>Start with your preferred path</h3>
+            <span className="feature-index">Immediate deployment</span>
+            <h3>Launch your precision build in one step</h3>
             <p>
-              Users can immediately choose between optimizing an existing CV and completing a guided profile flow, reducing friction at the first decision point.
+              Choose optimization or guided build, then generate a pre-calibrated suite built for competitive trainee pipelines.
             </p>
             <button type="button" className="btn btn-primary mt-16" onClick={onStart}>
-              Enter Builder
+              Begin Precision Build
             </button>
           </article>
         </section>
       </main>
 
       <footer className="footer">
-        Built for Nigerian Graduates. Structured for real graduate trainee application flows.
+        Built for ambitious Nigerian graduates. Optimized for competitive trainee outcomes.
       </footer>
     </div>
   );

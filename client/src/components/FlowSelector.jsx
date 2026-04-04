@@ -3,19 +3,19 @@ import React from 'react';
 const CHOICES = [
   {
     id: 'paste',
-    title: 'Optimize Existing CV',
-    text: 'Paste your current draft and generate a sharper, role-aligned application suite in one run.',
-    chip: 'Fast Track',
-    bestFor: 'Best for: users with a CV draft',
-    pace: 'Time: about 3-5 minutes',
+    title: 'CV Optimization',
+    text: 'Refine an existing CV into a role-aligned application suite.',
+    chip: 'Optimization',
+    bestFor: 'Best for: existing CVs',
+    pace: 'Estimated time: 3-5 min',
   },
   {
     id: 'wizard',
-    title: 'Guided CV Builder',
-    text: 'Answer six focused steps and we assemble your profile even if you are starting from scratch.',
-    chip: 'Structured Track',
-    bestFor: 'Best for: first draft creation',
-    pace: 'Time: about 6-10 minutes',
+    title: 'Guided Build',
+    text: 'Build a complete CV from structured prompts.',
+    chip: 'Structured',
+    bestFor: 'Best for: first-time drafts',
+    pace: 'Estimated time: 6-10 min',
   },
 ];
 

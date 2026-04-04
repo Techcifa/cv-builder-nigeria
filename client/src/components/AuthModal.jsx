@@ -36,10 +36,10 @@ const AuthModal = ({ isOpen, onClose }) => {
       } else {
         const { error: authError } = await supabase.auth.signUp({ email, password });
         if (authError) throw authError;
-        setMsg('Check your email for the confirmation link.');
+        setMsg('Confirmation sent. Check your email to activate access.');
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Authentication failed. Verify credentials and retry.');
     } finally {
       setLoading(false);
     }
@@ -54,17 +54,17 @@ const AuthModal = ({ isOpen, onClose }) => {
         aria-labelledby="auth-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <button type="button" className="auth-close" onClick={onClose} aria-label="Close authentication dialog">
+        <button type="button" className="auth-close" onClick={onClose} aria-label="Close sign-in window">
           x
         </button>
 
         <h2 id="auth-title" className="auth-title">
-          {isLogin ? 'Welcome back' : 'Create an account'}
+          {isLogin ? 'Welcome back' : 'Create your account'}
         </h2>
         <p className="auth-subtitle">
           {isLogin
-            ? 'Log in to access your saved application suites.'
-            : 'Sign up to save generated application suites automatically.'}
+            ? 'Access your career portfolio and synchronized application assets.'
+            : 'Create an account to sync generated suites and preserve progress.'}
         </p>
 
         {error ? <div className="auth-note auth-note-error">{error}</div> : null}
@@ -102,12 +102,12 @@ const AuthModal = ({ isOpen, onClose }) => {
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Processing...' : isLogin ? 'Log In' : 'Sign Up'}
+            {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}
           </button>
         </form>
 
         <div className="auth-switch">
-          <span>{isLogin ? "Don't have an account?" : 'Already have an account?'}</span>
+          <span>{isLogin ? 'No account yet?' : 'Already registered?'}</span>
           <button
             type="button"
             className="auth-switch-button"
@@ -117,7 +117,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               setMsg(null);
             }}
           >
-            {isLogin ? 'Sign up' : 'Log in'}
+            {isLogin ? 'Create account' : 'Sign in'}
           </button>
         </div>
       </div>
