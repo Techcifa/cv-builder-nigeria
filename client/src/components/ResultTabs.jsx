@@ -150,7 +150,7 @@ const ResultTabs = ({ data, onReset, onRegenerate }) => {
       {actionError ? <div className="error-banner">{actionError}</div> : null}
       {actionSuccess ? <div className="success-banner">{actionSuccess}</div> : null}
 
-      <section className="result-panel" role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+      <section className="card result-panel" role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
         {activeTab === 'cv' ? (
           <div className="stack-16">
             <TemplatePicker activeTemplate={activeTemplate} onSelect={setActiveTemplate} />
@@ -171,13 +171,19 @@ const ResultTabs = ({ data, onReset, onRegenerate }) => {
 
         {activeTab === 'gaps' ? (
           <div className="stack-14">
-            <div className="result-summary">
-              <span>{criticalCount} Critical Gaps</span>
-              <span>{importantCount} Priority Gaps</span>
-              <span>{niceCount} Optional Gaps</span>
+            <div className="result-summary" role="group" aria-label="Diagnostic gap summary">
+              <span className="result-summary-item critical" aria-label={`${criticalCount} critical gaps`}>
+                {criticalCount} Critical Gaps
+              </span>
+              <span className="result-summary-item important" aria-label={`${importantCount} priority gaps`}>
+                {importantCount} Priority Gaps
+              </span>
+              <span className="result-summary-item nice" aria-label={`${niceCount} optional gaps`}>
+                {niceCount} Optional Gaps
+              </span>
             </div>
             {sortedGaps.map((gap, index) => (
-              <article key={`${gap.gap}-${index}`} className={`gap-card ${gap.severity}`}>
+              <article key={`${gap.gap}-${index}`} className={`card gap-card ${gap.severity}`}>
                 <span className="gap-badge">
                   {gap.severity === 'critical'
                     ? 'Critical'
@@ -203,8 +209,8 @@ const ResultTabs = ({ data, onReset, onRegenerate }) => {
             </header>
             {certifications.length === 0 ? <p className="muted">No upskilling recommendations available.</p> : null}
             {certifications.map((cert, index) => (
-              <article key={`${cert.name}-${index}`} className="cert-card">
-                <div className="row-between align-start gap-10">
+              <article key={`${cert.name}-${index}`} className="card cert-card">
+                <div className="row-between align-start">
                   <h4 className="item-title">{cert.name}</h4>
                   <span className="muted text-2xs">
                     {String(index + 1).padStart(2, '0')}

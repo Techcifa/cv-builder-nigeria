@@ -95,7 +95,7 @@ const Landing = ({ onStart }) => {
           </div>
           <div className="card-grid three">
             {PRINCIPLES.map((item, index) => (
-              <article className="feature-card" key={item.title}>
+              <article className="card feature-card" key={item.title}>
                 <span className="feature-index">Principle {index + 1}</span>
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
@@ -104,14 +104,14 @@ const Landing = ({ onStart }) => {
           </div>
         </section>
 
-        <section className="marketing-section panel panel-pad">
+        <section className="marketing-section card card-panel panel panel-pad">
           <div className="section-head">
             <h2>Your Complete Application Arsenal</h2>
             <p>Everything you need to compete in elite trainee pipelines, generated in one run.</p>
           </div>
           <div className="card-grid">
             {OUTPUTS.map((item) => (
-              <article className="feature-card" key={item.title}>
+              <article className="card feature-card" key={item.title}>
                 <h3>{item.title}</h3>
                 <p>{item.detail}</p>
               </article>
@@ -120,7 +120,7 @@ const Landing = ({ onStart }) => {
         </section>
 
         <section className="marketing-section split">
-          <article className="feature-card">
+          <article className="card feature-card">
             <span className="feature-index">Outcome focus</span>
             <h3>Designed for measurable screening performance</h3>
             <p>
@@ -128,7 +128,7 @@ const Landing = ({ onStart }) => {
             </p>
           </article>
 
-          <article className="feature-card">
+          <article className="card feature-card">
             <span className="feature-index">Immediate deployment</span>
             <h3>Launch your precision build in one step</h3>
             <p>

@@ -10,10 +10,10 @@ const AuthModal = lazy(() => import('./components/AuthModal'));
 
 const CREATE_STEPS = ['Home', 'Build', 'Results'];
 const NAV_ITEMS = [
-  { id: 'create', label: 'Create', short: 'Create' },
-  { id: 'suites', label: 'My Suites', short: 'Suites' },
-  { id: 'templates', label: 'Templates', short: 'Templates' },
-  { id: 'settings', label: 'Settings', short: 'Settings' },
+  { id: 'create', label: 'Create', short: 'Create', icon: 'C' },
+  { id: 'suites', label: 'My Suites', short: 'Suites', icon: 'S' },
+  { id: 'templates', label: 'Templates', short: 'Templates', icon: 'T' },
+  { id: 'settings', label: 'Settings', short: 'Settings', icon: 'G' },
 ];
 const APP_STATE_KEY = 'gt_builder_app_state_v2';
 const LOADING_STAGES = [
@@ -98,6 +98,16 @@ const App = () => {
   }, [createStage]);
 
   const activeNavLabel = NAV_ITEMS.find((item) => item.id === workspace)?.label || 'Create';
+  const activeWorkspaceKicker = useMemo(() => {
+    if (workspace === 'create') {
+      if (createStage === 'home') return 'Workspace Overview';
+      if (createStage === 'builder') return 'Application Builder';
+      return 'Results Studio';
+    }
+    if (workspace === 'suites') return 'Career Portfolio';
+    if (workspace === 'templates') return 'Template Library';
+    return 'System Controls';
+  }, [workspace, createStage]);
   const criticalGapCount = Array.isArray(result?.gap_analysis)
     ? result.gap_analysis.filter((item) => item.severity === 'critical').length
     : 0;
@@ -273,7 +283,7 @@ const App = () => {
   };
 
   const loadingFallback = (
-    <div className="loader panel">
+    <div className="loader card card-panel panel">
       <div className="spinner" />
       <p className="loader-title">Loading interface...</p>
     </div>
@@ -289,7 +299,7 @@ const App = () => {
         </p>
       </header>
 
-      <div className="journey-strip panel panel-pad fade-in fade-in-delay-1">
+      <div className="journey-strip card card-panel panel panel-pad fade-in fade-in-delay-1">
         <h2 className="section-title">How the system drives outcomes</h2>
         <div className="journey-points">
           <div className="journey-point">
@@ -307,7 +317,7 @@ const App = () => {
         </div>
       </div>
 
-      <section className="panel panel-pad fade-in fade-in-delay-2">
+      <section className="card card-panel panel panel-pad fade-in fade-in-delay-2">
         <div className="section-head">
           <h2>Choose a starting mode</h2>
           <p>One continuous workspace. Switch modes anytime before generation.</p>
@@ -344,7 +354,7 @@ const App = () => {
       </div>
 
       {loading ? (
-        <div className="loader panel">
+        <div className="loader card card-panel panel">
           <div className="spinner" />
           <p className="loader-title">Generating your calibrated application suite...</p>
           <p className="muted mt-8">Usually completes in under 60 seconds.</p>
@@ -391,7 +401,7 @@ const App = () => {
   const renderSuitesWorkspace = () => {
     if (!user) {
       return (
-        <section className="panel panel-pad stack-12 fade-in">
+        <section className="card card-panel panel panel-pad stack-12 fade-in">
           <h2 className="section-title">Sign in to access your career portfolio</h2>
           <p className="muted">
             Your pre-calibrated suites are synced for rapid reuse and continuous refinement.
@@ -425,23 +435,23 @@ const App = () => {
   };
 
   const renderTemplatesWorkspace = () => (
-    <section className="panel panel-pad stack-14 fade-in">
+    <section className="card card-panel panel panel-pad stack-14 fade-in">
       <header className="section-head">
         <h2>Templates</h2>
         <p>Compare delivery formats and set the structure best aligned to your target pipeline.</p>
       </header>
       <div className="card-grid">
-        <article className="feature-card">
+        <article className="card feature-card">
           <span className="feature-index">Ready</span>
           <h3>Modern</h3>
           <p>Balanced, recruitment-friendly structure with contemporary hierarchy.</p>
         </article>
-        <article className="feature-card">
+        <article className="card feature-card">
           <span className="feature-index">Ready</span>
           <h3>Classic</h3>
           <p>Traditional single-column format for conservative hiring pipelines.</p>
         </article>
-        <article className="feature-card">
+        <article className="card feature-card">
           <span className="feature-index">Ready</span>
           <h3>Executive</h3>
           <p>High-contrast, leadership-forward presentation for senior trajectories.</p>
@@ -451,17 +461,17 @@ const App = () => {
   );
 
   const renderSettingsWorkspace = () => (
-    <section className="panel panel-pad stack-14 fade-in">
+    <section className="card card-panel panel panel-pad stack-14 fade-in">
       <header className="section-head">
         <h2>Settings</h2>
         <p>Manage account, workflow, and generation defaults.</p>
       </header>
       <div className="settings-grid">
-        <article className="feature-card">
+        <article className="card feature-card">
           <h3>Default start mode</h3>
           <p className="muted">Set your preferred starting path for future suite generation.</p>
         </article>
-        <article className="feature-card">
+        <article className="card feature-card">
           <h3>Output defaults</h3>
           <p className="muted">Keep preferred industry and template selections persistent across sessions.</p>
         </article>
@@ -502,7 +512,7 @@ const App = () => {
         <div className="workspace-main">
           <header className="workspace-topbar">
             <div className="workspace-title-group">
-              <span className="workspace-kicker">Active Workspace</span>
+              <span className="workspace-kicker">{activeWorkspaceKicker}</span>
               <h1 className="workspace-title">{activeNavLabel}</h1>
             </div>
             <div className="workspace-utility">
@@ -583,8 +593,10 @@ const App = () => {
             type="button"
             className={`mobile-dock-item ${workspace === item.id ? 'active' : ''}`}
             onClick={() => setWorkspace(item.id)}
+            aria-current={workspace === item.id ? 'page' : undefined}
           >
-            {item.short}
+            <span className="mobile-dock-icon" aria-hidden="true">{item.icon}</span>
+            <span>{item.short}</span>
           </button>
         ))}
       </nav>

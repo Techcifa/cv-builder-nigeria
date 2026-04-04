@@ -8,7 +8,7 @@ const TEMPLATES = [
 
 const TemplatePicker = ({ activeTemplate, onSelect }) => {
   return (
-    <section className="stack-10">
+    <section className="stack-12">
       <h3 className="template-heading">Choose PDF template</h3>
       <div className="card-grid">
         {TEMPLATES.map((template) => (

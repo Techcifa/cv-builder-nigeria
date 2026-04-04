@@ -46,12 +46,12 @@ const Dashboard = ({ user, onViewCV, onBack }) => {
       </header>
 
       {loading ? (
-        <div className="loader panel">
+        <div className="loader card card-panel panel">
           <div className="spinner" />
           <p>Loading your saved results...</p>
         </div>
       ) : cvs.length === 0 ? (
-        <div className="panel panel-pad">
+        <div className="card card-panel panel panel-pad">
           <h3>Your portfolio is empty</h3>
           <p className="muted mt-8 mb-16">
             Initiate your first generation to establish your baseline career assets.
@@ -63,18 +63,11 @@ const Dashboard = ({ user, onViewCV, onBack }) => {
       ) : (
         <div className="dashboard-grid">
           {cvs.map((cv) => (
-            <article
+            <button
               key={cv.id}
-              className="dashboard-card"
-              role="button"
-              tabIndex={0}
+              type="button"
+              className="card dashboard-card"
               onClick={() => onViewCV(cv.data)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  onViewCV(cv.data);
-                }
-              }}
             >
               <div className="row-between">
                 <span className="flow-chip">{cv.data?.industry || 'General'}</span>
@@ -89,7 +82,7 @@ const Dashboard = ({ user, onViewCV, onBack }) => {
               <h3>Pre-Calibrated Application Suite</h3>
               <p className="muted">CV, diagnostics, upskilling roadmap, cover letter, and LinkedIn profile copy.</p>
               <strong className="accent-text">Open Suite</strong>
-            </article>
+            </button>
           ))}
         </div>
       )}

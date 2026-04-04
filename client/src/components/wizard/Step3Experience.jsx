@@ -18,7 +18,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
         <button 
           type="button"
           className="chip-label" 
-          style={{ background: hasExperience ? 'transparent' : 'var(--red-alpha)' }} 
+          style={{ background: hasExperience ? 'transparent' : 'rgba(255, 111, 126, 0.14)' }} 
           onClick={() => setHasExperience(!hasExperience)}
         >
           {hasExperience ? 'Skip (No Experience)' : 'I have experience'}
@@ -28,7 +28,7 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
       {hasExperience ? (
         <div>
           {experience.map((exp, i) => (
-            <div key={i} style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '20px' }}>
+            <div key={i} style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '20px' }}>
               <div className="responsive-grid">
                 <div className="form-group">
                   <label className="form-label">Role Title</label>
@@ -63,8 +63,8 @@ const Step3Experience = ({ hasExperience, experience, setHasExperience, setExper
           <button type="button" className="btn btn-ghost" onClick={addExp}>+ Add Another Experience</button>
         </div>
       ) : (
-        <div style={{ background: 'var(--accent-alpha)', padding: '24px', borderRadius: '12px', border: '1px solid var(--accent-glow)' }}>
-          <p style={{ color: 'var(--accent-light)', fontWeight: '600' }}>No problem! Our AI specializes in highlighting academic projects and leadership for fresh graduates.</p>
+        <div style={{ background: 'rgba(52, 215, 255, 0.18)', padding: '24px', borderRadius: '12px', border: '1px solid rgba(52, 215, 255, 0.28)' }}>
+          <p style={{ color: 'var(--accent)', fontWeight: '600' }}>No problem! Our AI specializes in highlighting academic projects and leadership for fresh graduates.</p>
         </div>
       )}
     </div>

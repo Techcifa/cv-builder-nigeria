@@ -18,7 +18,7 @@ const LinkedInTab = ({ content, onCopy }) => {
   return (
     <div className="stack-14">
       {isStructured ? (
-        <section className="result-card">
+        <section className="card result-card">
           <div className="row-between">
             <h3 className="item-title">Professional Headline</h3>
             <button type="button" className="btn" onClick={() => handleCopy(headline, 'headline')}>
@@ -29,21 +29,21 @@ const LinkedInTab = ({ content, onCopy }) => {
         </section>
       ) : null}
 
-      <section className="result-card">
+      <section className="card result-card">
         <div className="row-between">
           <h3 className="item-title">LinkedIn About Section</h3>
           <button type="button" className="btn" onClick={() => handleCopy(about, 'about')}>
             {copied === 'about' ? 'Copied' : 'Copy'}
           </button>
         </div>
-        <div className="result-rich-text mt-10">
+        <div className="result-rich-text mt-8">
           {about || 'LinkedIn summary not available.'}
         </div>
       </section>
 
       {isStructured && skills.length > 0 ? (
-        <section className="result-card">
-          <h3 className="item-title mb-10">Recommended Skills</h3>
+        <section className="card result-card">
+          <h3 className="item-title">Recommended Skills</h3>
           <div className="cert-chip-row">
             {skills.map((skill, index) => (
               <span key={`${skill}-${index}`} className="cert-chip">

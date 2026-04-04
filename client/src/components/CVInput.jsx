@@ -33,11 +33,11 @@ const CVInput = ({ cvText, setCvText, industry, setIndustry, onSubmit, loading, 
   };
 
   return (
-    <div style={{ display: 'grid', gap: 24 }}>
+    <div className="form-stack">
       <section>
         <div className="section-label">Step 1: Paste CV Content</div>
         <textarea
-          className="input-like"
+          className="form-input"
           placeholder="Paste your current CV content. Formatting is optional; measurable outcomes are prioritized."
           value={cvText}
           onChange={(event) => setCvText(event.target.value)}

@@ -156,14 +156,14 @@ const CVWizard = ({ onComplete, onCancel }) => {
         <div className="step-content">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <h2>Work Experience</h2>
-            <button className="chip-label" style={{ background: formData.hasExperience ? 'transparent' : 'var(--red-alpha)' }} onClick={() => setFormData(p => ({ ...p, hasExperience: !p.hasExperience }))}>
+            <button type="button" className="chip-label" style={{ background: formData.hasExperience ? 'transparent' : 'rgba(255, 111, 126, 0.14)' }} onClick={() => setFormData(p => ({ ...p, hasExperience: !p.hasExperience }))}>
               {formData.hasExperience ? 'Skip (No Experience)' : 'I have experience'}
             </button>
           </div>
           {formData.hasExperience ? (
             <div>
               {formData.experience.map((exp, i) => (
-                <div key={i} style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '20px' }}>
+                <div key={i} style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '20px' }}>
                   <div className="responsive-grid">
                     <div className="form-group">
                       <label className="form-label">Role Title</label>
@@ -180,10 +180,10 @@ const CVWizard = ({ onComplete, onCancel }) => {
                   </div>
                 </div>
               ))}
-              <button style={{ color: 'var(--accent-light)', fontWeight: '700' }} onClick={addExp}>+ Add Another Experience</button>
+              <button type="button" className="btn btn-ghost" onClick={addExp}>+ Add Another Experience</button>
             </div>
           ) : (
-            <div className="tip-box" style={{ background: 'var(--accent-alpha)', padding: '20px', borderRadius: '12px' }}>
+            <div className="info-banner">
               No problem! Our AI specializes in highlighting academic projects and leadership for fresh graduates.
             </div>
           )}
@@ -231,7 +231,8 @@ const CVWizard = ({ onComplete, onCancel }) => {
           <h2 style={{ marginBottom: '24px' }}>Target Industry</h2>
           <div className="responsive-grid" style={{ marginBottom: '32px' }}>
             {INDUSTRIES.map(ind => (
-              <button 
+              <button
+                type="button"
                 key={ind.id} 
                 className="chip-label" 
                 style={{ 
@@ -241,9 +242,9 @@ const CVWizard = ({ onComplete, onCancel }) => {
                   alignItems: 'center', 
                   justifyContent: 'center', 
                   gap: '12px',
-                  background: formData.target.industry === ind.id ? 'var(--accent-alpha)' : 'rgba(255,255,255,0.03)',
+                  background: formData.target.industry === ind.id ? 'rgba(52, 215, 255, 0.18)' : 'rgba(255,255,255,0.03)',
                   borderColor: formData.target.industry === ind.id ? 'var(--accent)' : 'var(--border)',
-                  color: formData.target.industry === ind.id ? 'white' : 'var(--text-muted)'
+                  color: formData.target.industry === ind.id ? 'white' : 'var(--text-1)'
                 }}
                 onClick={() => updateNested('target', 'industry', ind.id)}
               >
@@ -280,46 +281,32 @@ const CVWizard = ({ onComplete, onCancel }) => {
         {renderStep()}
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', mt: '40px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
-        <button 
-          className="chip-label" 
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', paddingTop: '32px', borderTop: '1px solid var(--border)' }}>
+        <button
+          type="button"
+          className="btn btn-ghost"
           onClick={step === 1 ? onCancel : prevStep}
-          style={{ padding: '12px 24px' }}
         >
           {step === 1 ? 'Cancel' : 'Back'}
         </button>
         
         {step < 6 ? (
-          <button 
-            className="submit-btn" 
-            style={{ 
-              backgroundColor: canGoNext() ? 'var(--accent)' : 'var(--surface2)', 
-              color: 'white', 
-              padding: '12px 32px', 
-              borderRadius: '8px',
-              opacity: canGoNext() ? 1 : 0.5,
-              cursor: canGoNext() ? 'pointer' : 'not-allowed'
-            }}
+          <button
+            type="button"
+            className="btn btn-primary"
             onClick={nextStep}
             disabled={!canGoNext()}
           >
-            Next Step →
+            Next Step
           </button>
         ) : (
-          <button 
-            className="submit-btn" 
-            style={{ 
-              background: canGoNext() ? 'linear-gradient(135deg, var(--accent), var(--accent2))' : 'var(--surface2)', 
-              color: 'white', 
-              padding: '12px 32px', 
-              borderRadius: '8px',
-              opacity: canGoNext() ? 1 : 0.5,
-              cursor: canGoNext() ? 'pointer' : 'not-allowed'
-            }}
+          <button
+            type="button"
+            className="btn btn-primary"
             onClick={handleFinish}
             disabled={!canGoNext()}
           >
-            FINISH & GENERATE AI CV ⚡
+            Finalize Resume
           </button>
         )}
       </div>
